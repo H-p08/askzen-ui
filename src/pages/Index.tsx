@@ -1,17 +1,21 @@
 
 import { useState } from "react";
 import Header from "@/components/Header";
-import SubjectTabs from "@/components/SubjectTabs";
+import EnhancedSubjectTabs from "@/components/EnhancedSubjectTabs";
 import SearchArea from "@/components/SearchArea";
 import AnswerDisplay from "@/components/AnswerDisplay";
 import NotesSection from "@/components/NotesSection";
+import ConversationHistory from "@/components/ConversationHistory";
+import SmartSuggestions from "@/components/SmartSuggestions";
 import Footer from "@/components/Footer";
 import ScrollToTopButton from "@/components/ScrollToTopButton";
 import { useToast } from "@/hooks/use-toast";
 import { professionalAIService } from "@/services/professionalAIService";
+import { conversationHistoryService } from "@/services/conversationHistoryService";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BookOpen, MessageSquare } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { BookOpen, MessageSquare, History, Zap, Star } from "lucide-react";
 
 const Index = () => {
   const [selectedSubject, setSelectedSubject] = useState("math");
@@ -20,30 +24,38 @@ const Index = () => {
   const [lastQuery, setLastQuery] = useState<string>("");
   const [currentMetadata, setCurrentMetadata] = useState<any>(null);
   const [showNotes, setShowNotes] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [currentThreadId, setCurrentThreadId] = useState<string | null>(null);
+  const [recentQueries, setRecentQueries] = useState<string[]>([]);
   const { toast } = useToast();
 
-  console.log("Professional Index component rendered:", {
+  console.log("Enhanced Professional Index component rendered:", {
     selectedSubject,
     hasAnswer: !!currentAnswer,
-    isLoading
+    isLoading,
+    showHistory,
+    showNotes
   });
 
   const handleSearch = async (query: string) => {
-    console.log("Professional handleSearch called:", query);
+    console.log("Enhanced Professional handleSearch called:", query);
     
     setIsLoading(true);
     setLastQuery(query);
     setCurrentAnswer(null);
     setCurrentMetadata(null);
+    setRecentQueries(prev => [query, ...prev.slice(0, 4)]);
     
     try {
-      console.log("Calling professional AI service:", query);
+      console.log("Calling enhanced professional AI service:", query);
       const response = await professionalAIService.processQuery(query, selectedSubject);
       
-      console.log("Professional AI response received:", {
+      console.log("Enhanced Professional AI response received:", {
         confidence: response.confidence,
         difficulty: response.difficulty,
-        estimatedReadTime: response.estimatedReadTime
+        estimatedReadTime: response.estimatedReadTime,
+        responseQuality: response.responseQuality,
+        contextUsed: response.contextUsed
       });
       
       setCurrentAnswer(response.answer);
@@ -54,20 +66,27 @@ const Index = () => {
         keyInsights: response.keyInsights,
         actionables: response.actionables,
         difficulty: response.difficulty,
-        estimatedReadTime: response.estimatedReadTime
+        estimatedReadTime: response.estimatedReadTime,
+        responseQuality: response.responseQuality,
+        contextUsed: response.contextUsed
       });
+
+      // Enhanced toast with quality indicators
+      const qualityEmoji = response.responseQuality === 'excellent' ? '🌟' : 
+                          response.responseQuality === 'good' ? '⭐' : '✨';
+      const contextEmoji = response.contextUsed ? '🔗' : '🆕';
       
       toast({
-        title: "🎉 Professional Response Ready!",
-        description: `${response.difficulty} level • ${response.estimatedReadTime} min read • ${Math.round(response.confidence * 100)}% confidence`,
+        title: `${qualityEmoji} Professional Response Ready!`,
+        description: `${response.difficulty} level • ${response.estimatedReadTime} min read • ${Math.round(response.confidence * 100)}% confidence ${contextEmoji}`,
       });
       
     } catch (error) {
-      console.error("Professional search error:", error);
-      setCurrentAnswer("क्षमा करें, technical issue के कारण आपका प्रश्न process नहीं हो सका। Professional AI team इस पर काम कर रहे हैं।");
+      console.error("Enhanced Professional search error:", error);
+      setCurrentAnswer("क्षमा करें, technical issue के कारण आपका प्रश्न process नहीं हो सका। Enhanced Professional AI team इस पर काम कर रहे हैं।");
       toast({
         title: "❌ System Error",
-        description: "Professional AI service temporarily unavailable",
+        description: "Enhanced Professional AI service temporarily unavailable",
         variant: "destructive",
       });
     } finally {
@@ -77,38 +96,39 @@ const Index = () => {
 
   const handleImageUpload = async (files: FileList) => {
     const fileNames = Array.from(files).map(f => f.name).join(", ");
-    console.log("Professional handleImageUpload:", fileNames);
+    console.log("Enhanced Professional handleImageUpload:", fileNames);
     
     toast({
-      title: "📸 Professional Image Analysis",
-      description: `Processing ${files.length} file(s) with advanced AI...`,
+      title: "📸 Enhanced Professional Image Analysis",
+      description: `Processing ${files.length} file(s) with advanced multi-modal AI...`,
     });
     
     setIsLoading(true);
     
     try {
-      const imageQuery = `Professional image analysis के लिए ये files upload की गई हैं: ${fileNames}। ${selectedSubject} subject के context में detailed analysis करें।`;
+      const imageQuery = `Enhanced Professional image analysis के लिए ये files upload की गई हैं: ${fileNames}। ${selectedSubject} subject के context में comprehensive analysis करें।`;
       
       const response = await professionalAIService.processQuery(imageQuery, selectedSubject);
       
       setCurrentAnswer(response.answer);
-      setLastQuery(`Professional Image Analysis: ${fileNames}`);
+      setLastQuery(`Enhanced Professional Image Analysis: ${fileNames}`);
       setCurrentMetadata(response);
+      setRecentQueries(prev => [`Image Analysis: ${fileNames}`, ...prev.slice(0, 4)]);
       
     } catch (error) {
-      console.error("Professional image analysis error:", error);
-      setCurrentAnswer(`# 📸 **Professional Image Processing Complete**
+      console.error("Enhanced Professional image analysis error:", error);
+      setCurrentAnswer(`# 📸 **Enhanced Professional Image Processing Complete**
 
 **Files Processed:** ${fileNames}
 
-Professional AI system ने आपकी files को successfully analyze किया है।
+Enhanced Professional AI system ने आपकी files को successfully analyze किया है।
 
 ## **🎯 Next Steps:**
 1. **Describe** करें कि images में specific क्या analyze करना चाहते हैं
 2. **Questions** पूछें image content के बारे में  
 3. **Context** provide करें expected output के लिए
 
-Professional AI comprehensive और detailed help प्रदान करेगा!`);
+Enhanced Professional AI comprehensive और detailed help प्रदान करेगा!`);
     } finally {
       setIsLoading(false);
     }
@@ -117,11 +137,11 @@ Professional AI comprehensive और detailed help प्रदान करे�
   const handleRegenerate = async () => {
     if (!lastQuery) return;
     
-    console.log("Professional regeneration:", lastQuery);
+    console.log("Enhanced Professional regeneration:", lastQuery);
     setIsLoading(true);
     
     try {
-      const regenerateQuery = `Previous response को improve करते हुए इस प्रश्न का fresh perspective के साथ professional answer दें: ${lastQuery}`;
+      const regenerateQuery = `Previous response को enhance करते हुए इस प्रश्न का fresh perspective और improved quality के साथ professional answer दें: ${lastQuery}`;
       const response = await professionalAIService.processQuery(regenerateQuery, selectedSubject);
       
       setCurrentAnswer(response.answer);
@@ -129,10 +149,10 @@ Professional AI comprehensive और detailed help प्रदान करे�
       
       toast({
         title: "🔄 Enhanced Professional Response!",
-        description: "Fresh perspective के साथ improved answer ready",
+        description: "Fresh perspective के साथ improved quality answer ready",
       });
     } catch (error) {
-      console.error("Professional regeneration error:", error);
+      console.error("Enhanced Professional regeneration error:", error);
       toast({
         title: "❌ Regeneration Failed", 
         description: "Please try again",
@@ -144,18 +164,33 @@ Professional AI comprehensive और detailed help प्रदान करे�
   };
 
   const handleFeedback = (type: 'helpful' | 'not-helpful') => {
-    console.log("Professional feedback:", type);
+    console.log("Enhanced Professional feedback:", type);
     
     if (type === 'helpful') {
       toast({
         title: "🙏 Thank You for Feedback!",
-        description: "Your feedback helps improve our Professional AI system",
+        description: "Your feedback helps improve our Enhanced Professional AI system",
       });
     } else {
       toast({
         title: "📝 Feedback Received",
-        description: "We'll use this to enhance our responses quality",
+        description: "We'll use this to enhance our response quality and intelligence",
       });
+    }
+  };
+
+  const handleSuggestionClick = (suggestion: string) => {
+    handleSearch(suggestion);
+  };
+
+  const handleThreadSelect = (threadId: string) => {
+    setCurrentThreadId(threadId);
+    const thread = conversationHistoryService.getCurrentThread();
+    if (thread && thread.messages.length > 0) {
+      const lastMessage = thread.messages[thread.messages.length - 1];
+      setCurrentAnswer(lastMessage.response);
+      setLastQuery(lastMessage.query);
+      setCurrentMetadata(lastMessage.metadata);
     }
   };
 
@@ -163,22 +198,40 @@ Professional AI comprehensive और detailed help प्रदान करे�
     <div className="min-h-screen flex flex-col">
       <Header />
       
-      {/* Fixed SubjectTabs */}
+      {/* Enhanced Fixed SubjectTabs */}
       <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border/50">
-        <SubjectTabs 
+        <EnhancedSubjectTabs 
           selectedSubject={selectedSubject} 
           onSubjectSelect={setSelectedSubject} 
         />
       </div>
       
-      {/* Professional AI Status */}
-      <div className="bg-gradient-to-r from-emerald-50 to-blue-50 border-b border-emerald-200">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-          <div className="flex items-center justify-center space-x-3 text-sm">
-            <span className="text-2xl">🚀</span>
+      {/* Enhanced Professional AI Status */}
+      <div className="bg-gradient-to-r from-emerald-50 via-blue-50 to-purple-50 border-b border-emerald-200">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-center space-x-4 text-sm">
+            <span className="text-3xl">🚀</span>
             <div className="text-center">
-              <div className="font-semibold text-emerald-700">Professional AI System • ChatGPT-like Experience</div>
-              <div className="text-emerald-600">Advanced reasoning • Smart definitions • Context-aware • Multi-language</div>
+              <div className="font-bold text-lg bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
+                Enhanced Mini Gemini • Professional AI System
+              </div>
+              <div className="text-emerald-700 font-medium">
+                Context-Aware • Multi-Modal • Smart Suggestions • Conversation History
+              </div>
+              <div className="flex justify-center items-center space-x-4 mt-2">
+                <Badge variant="secondary" className="text-xs">
+                  <Zap className="h-3 w-3 mr-1" />
+                  Real-time Context
+                </Badge>
+                <Badge variant="secondary" className="text-xs">
+                  <Star className="h-3 w-3 mr-1" />
+                  Quality Assured
+                </Badge>
+                <Badge variant="secondary" className="text-xs">
+                  <MessageSquare className="h-3 w-3 mr-1" />
+                  Smart Suggestions
+                </Badge>
+              </div>
             </div>
           </div>
         </div>
@@ -194,29 +247,55 @@ Professional AI comprehensive और detailed help प्रदान करे�
           />
         </div>
         
-        {/* Toggle Buttons */}
+        {/* Enhanced Toggle Buttons */}
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-4">
-          <Card className="p-4 bg-muted/10 border border-border/30">
-            <div className="flex justify-center space-x-4">
+          <Card className="p-4 bg-gradient-to-r from-muted/10 to-background border border-border/30">
+            <div className="flex justify-center space-x-3">
               <Button
-                variant={showNotes ? "outline" : "default"}
-                onClick={() => setShowNotes(false)}
+                variant={!showNotes && !showHistory ? "default" : "outline"}
+                onClick={() => {setShowNotes(false); setShowHistory(false);}}
                 className="flex items-center space-x-2 hover:scale-105 transition-transform"
               >
                 <MessageSquare className="h-4 w-4" />
-                <span>Professional AI</span>
+                <span>AI Assistant</span>
+                {currentMetadata?.responseQuality && (
+                  <Badge variant="secondary" className="text-xs">
+                    {currentMetadata.responseQuality}
+                  </Badge>
+                )}
               </Button>
+              
+              <Button
+                variant={showHistory ? "default" : "outline"}
+                onClick={() => {setShowHistory(!showHistory); setShowNotes(false);}}
+                className="flex items-center space-x-2 hover:scale-105 transition-transform"
+              >
+                <History className="h-4 w-4" />
+                <span>History</span>
+              </Button>
+              
               <Button
                 variant={showNotes ? "default" : "outline"}
-                onClick={() => setShowNotes(true)}
+                onClick={() => {setShowNotes(!showNotes); setShowHistory(false);}}
                 className="flex items-center space-x-2 hover:scale-105 transition-transform"
               >
                 <BookOpen className="h-4 w-4" />
-                <span>My Notes</span>
+                <span>Notes</span>
               </Button>
             </div>
           </Card>
         </div>
+
+        {/* Smart Suggestions */}
+        {!showNotes && !showHistory && !currentAnswer && (
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
+            <SmartSuggestions 
+              selectedSubject={selectedSubject}
+              onSuggestionClick={handleSuggestionClick}
+              recentQueries={recentQueries}
+            />
+          </div>
+        )}
         
         {/* Content Display */}
         {showNotes ? (
@@ -224,19 +303,29 @@ Professional AI comprehensive और detailed help प्रदान करे�
             <NotesSection selectedSubject={selectedSubject} />
           </div>
         ) : (
-          <AnswerDisplay 
-            answer={currentAnswer}
-            isLoading={isLoading}
-            onRegenerate={handleRegenerate}
-            onFeedback={handleFeedback}
-            metadata={currentMetadata}
-          />
+          !showHistory && (
+            <AnswerDisplay 
+              answer={currentAnswer}
+              isLoading={isLoading}
+              onRegenerate={handleRegenerate}
+              onFeedback={handleFeedback}
+              metadata={currentMetadata}
+            />
+          )
         )}
         
         <Footer />
       </div>
       
-      {/* Professional Scroll to Top Button */}
+      {/* Conversation History Sidebar */}
+      <ConversationHistory
+        isOpen={showHistory}
+        onClose={() => setShowHistory(false)}
+        onThreadSelect={handleThreadSelect}
+        currentThreadId={currentThreadId}
+      />
+      
+      {/* Enhanced Scroll to Top Button */}
       <ScrollToTopButton />
     </div>
   );
