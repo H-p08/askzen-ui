@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import Header from "@/components/Header";
 import SubjectTabs from "@/components/SubjectTabs";
@@ -12,13 +13,21 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
+  console.log("Index component rendered with:", {
+    selectedSubject,
+    currentAnswer,
+    isLoading
+  });
+
   const handleSearch = async (query: string) => {
+    console.log("handleSearch called with query:", query);
     setIsLoading(true);
     
     // Simulate AI processing
     setTimeout(() => {
       const sampleAnswer = `Based on your ${selectedSubject} question: "${query}"\n\nHere's a comprehensive answer:\n\n1. First, let's break down the problem step by step.\n\n2. We need to identify the key concepts involved.\n\n3. Then we'll apply the appropriate formulas or methods.\n\n4. Finally, we'll solve and verify our answer.\n\nThis is a simulated response. In a real implementation, this would be powered by an AI model that provides detailed, accurate answers tailored to the specific subject and question asked.`;
       
+      console.log("Setting answer:", sampleAnswer);
       setCurrentAnswer(sampleAnswer);
       setIsLoading(false);
       
@@ -31,6 +40,8 @@ const Index = () => {
 
   const handleImageUpload = (files: FileList) => {
     const fileNames = Array.from(files).map(f => f.name).join(", ");
+    console.log("handleImageUpload called with files:", fileNames);
+    
     toast({
       title: "Images uploaded!",
       description: `Processing: ${fileNames}`,
@@ -41,22 +52,27 @@ const Index = () => {
     setTimeout(() => {
       const sampleAnswer = `I've analyzed your uploaded image(s): ${fileNames}\n\nBased on the visual content, here's what I can help you with:\n\n• I can see mathematical equations, diagrams, or text that needs solving\n• Let me break down the problem shown in the image\n• Here's the step-by-step solution...\n\nThis is a simulated response for image analysis. In a real implementation, this would use computer vision and AI to accurately read and solve problems from uploaded images.`;
       
+      console.log("Setting answer from image upload:", sampleAnswer);
       setCurrentAnswer(sampleAnswer);
       setIsLoading(false);
     }, 3000);
   };
 
   const handleRegenerate = () => {
+    console.log("handleRegenerate called with currentAnswer:", currentAnswer);
     if (currentAnswer) {
       setIsLoading(true);
       setTimeout(() => {
-        setCurrentAnswer(currentAnswer + "\n\n[Regenerated] Here's an alternative explanation or approach to the same problem...");
+        const newAnswer = currentAnswer + "\n\n[Regenerated] Here's an alternative explanation or approach to the same problem...";
+        console.log("Setting regenerated answer:", newAnswer);
+        setCurrentAnswer(newAnswer);
         setIsLoading(false);
       }, 2000);
     }
   };
 
   const handleFeedback = (type: 'helpful' | 'not-helpful') => {
+    console.log("handleFeedback called with type:", type);
     toast({
       title: type === 'helpful' ? "Thank you!" : "Feedback received",
       description: type === 'helpful' 

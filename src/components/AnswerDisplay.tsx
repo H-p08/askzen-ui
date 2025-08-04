@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { RefreshCw, ThumbsUp, ThumbsDown, Share2, Copy, Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,12 @@ interface AnswerDisplayProps {
 const AnswerDisplay = ({ answer, isLoading, onRegenerate, onFeedback }: AnswerDisplayProps) => {
   const [isCopied, setIsCopied] = useState(false);
   const { toast } = useToast();
+
+  console.log("AnswerDisplay rendered with props:", {
+    answer: answer ? `${answer.substring(0, 50)}...` : null,
+    isLoading,
+    hasAnswer: !!answer
+  });
 
   const handleCopy = async () => {
     if (answer) {
@@ -72,6 +79,7 @@ const AnswerDisplay = ({ answer, isLoading, onRegenerate, onFeedback }: AnswerDi
   };
 
   if (!answer && !isLoading) {
+    console.log("Rendering empty state");
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Card className="p-8 text-center bg-card/50 border border-border/50">
@@ -86,6 +94,8 @@ const AnswerDisplay = ({ answer, isLoading, onRegenerate, onFeedback }: AnswerDi
       </div>
     );
   }
+
+  console.log("Rendering answer content");
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
