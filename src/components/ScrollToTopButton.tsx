@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { ArrowUp } from 'lucide-react';
+import { ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const ScrollToTopButton = () => {
@@ -11,29 +11,32 @@ const ScrollToTopButton = () => {
     const toggleVisibility = () => {
       const scrolled = document.documentElement.scrollTop;
       const maxHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-      const progress = (scrolled / maxHeight) * 100;
+      const progress = maxHeight > 0 ? (scrolled / maxHeight) * 100 : 0;
       
       setScrollProgress(progress);
       setIsVisible(scrolled > 300);
     };
 
-    const throttledToggleVisibility = throttle(toggleVisibility, 100);
-    window.addEventListener('scroll', throttledToggleVisibility);
+    const throttledToggleVisibility = throttle(toggleVisibility, 16); // 60fps
+    window.addEventListener('scroll', throttledToggleVisibility, { passive: true });
 
     return () => window.removeEventListener('scroll', throttledToggleVisibility);
   }, []);
 
   const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
+    const scrollToTopSmoothly = () => {
+      const currentScroll = document.documentElement.scrollTop || document.body.scrollTop;
+      if (currentScroll > 0) {
+        window.scrollTo(0, currentScroll - currentScroll / 8);
+        requestAnimationFrame(scrollToTopSmoothly);
+      }
+    };
+    scrollToTopSmoothly();
   };
 
-  // Throttle function for better performance
-  function throttle(func: Function, limit: number) {
+  function throttle<T extends (...args: any[]) => any>(func: T, limit: number): (...args: Parameters<T>) => void {
     let inThrottle: boolean;
-    return function(this: any, ...args: any[]) {
+    return function(this: any, ...args: Parameters<T>) {
       if (!inThrottle) {
         func.apply(this, args);
         inThrottle = true;
@@ -44,51 +47,61 @@ const ScrollToTopButton = () => {
 
   if (!isVisible) return null;
 
+  const circumference = 2 * Math.PI * 18;
+  const strokeDashoffset = circumference - (scrollProgress / 100) * circumference;
+
   return (
-    <div className="fixed bottom-6 right-6 z-50">
-      {/* Progress Ring */}
+    <div className="fixed bottom-8 right-8 z-50 group">
       <div className="relative">
+        {/* Progress Circle Background */}
         <svg 
-          className="w-14 h-14 transform -rotate-90" 
-          viewBox="0 0 56 56"
+          className="w-12 h-12 transform -rotate-90 absolute inset-0" 
+          viewBox="0 0 40 40"
+          aria-hidden="true"
         >
           <circle
-            cx="28"
-            cy="28"
-            r="24"
+            cx="20"
+            cy="20"
+            r="18"
             stroke="currentColor"
-            strokeWidth="4"
+            strokeWidth="2"
             fill="none"
-            className="text-gray-200"
+            className="text-gray-200 dark:text-gray-700"
           />
           <circle
-            cx="28"
-            cy="28"
-            r="24"
+            cx="20"
+            cy="20"
+            r="18"
             stroke="currentColor"
-            strokeWidth="4"
+            strokeWidth="2"
             fill="none"
-            strokeDasharray={`${2 * Math.PI * 24}`}
-            strokeDashoffset={`${2 * Math.PI * 24 * (1 - scrollProgress / 100)}`}
-            className="text-primary transition-all duration-200"
+            strokeDasharray={circumference}
+            strokeDashoffset={strokeDashoffset}
+            className="text-primary transition-all duration-200 ease-out"
             strokeLinecap="round"
           />
         </svg>
         
-        {/* Button */}
+        {/* Main Button */}
         <Button
           onClick={scrollToTop}
-          className="absolute inset-2 w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 border-0 p-0"
+          size="icon"
+          className="w-12 h-12 rounded-full bg-white dark:bg-gray-800 text-primary shadow-lg hover:shadow-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-300 transform hover:scale-110 active:scale-95"
           aria-label="Scroll to top"
         >
-          <ArrowUp className="h-5 w-5" />
+          <ChevronUp className="h-5 w-5 transition-transform duration-300 group-hover:-translate-y-0.5" />
         </Button>
       </div>
       
       {/* Tooltip */}
-      <div className="absolute bottom-full right-0 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-        <div className="bg-gray-900 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
-          Top पर जाएं
+      <div className="absolute bottom-full right-0 mb-2 opacity-0 group-hover:opacity-100 transition-all duration-200 transform translate-y-1 group-hover:translate-y-0 pointer-events-none">
+        <div className="bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-xs px-3 py-2 rounded-lg whitespace-nowrap shadow-lg">
+          <div className="font-medium">Top पर जाएं</div>
+          <div className="text-xs opacity-75">{Math.round(scrollProgress)}% scrolled</div>
+          {/* Arrow */}
+          <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
+            <div className="w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-gray-900 dark:border-t-gray-100"></div>
+          </div>
         </div>
       </div>
     </div>

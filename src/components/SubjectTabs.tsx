@@ -4,6 +4,7 @@ import { Calculator, Microscope, BookOpen, Brain, Globe, Lightbulb, Image } from
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import ScienceSubTabs from "./ScienceSubTabs";
+import ReasoningSubTabs from "./ReasoningSubTabs";
 
 interface Subject {
   id: string;
@@ -17,9 +18,9 @@ const subjects: Subject[] = [
   { id: "math", name: "Math", icon: Calculator, emoji: "📐", colorClass: "bg-orange-100 hover:bg-orange-200 text-orange-700" },
   { id: "science", name: "Science", icon: Microscope, emoji: "🔬", colorClass: "bg-green-100 hover:bg-green-200 text-green-700" },
   { id: "english", name: "English", icon: BookOpen, emoji: "📖", colorClass: "bg-purple-100 hover:bg-purple-200 text-purple-700" },
-  { id: "reasoning", name: "Reasoning", icon: Brain, emoji: "🧮", colorClass: "bg-blue-100 hover:bg-blue-200 text-blue-700" },
+  { id: "reasoning", name: "Reasoning", icon: Brain, emoji: "🧠", colorClass: "bg-blue-100 hover:bg-blue-200 text-blue-700" },
   { id: "geography", name: "Geography", icon: Globe, emoji: "🌍", colorClass: "bg-emerald-100 hover:bg-emerald-200 text-emerald-700" },
-  { id: "knowledge", name: "General Knowledge", icon: Lightbulb, emoji: "🧠", colorClass: "bg-violet-100 hover:bg-violet-200 text-violet-700" },
+  { id: "knowledge", name: "General Knowledge", icon: Lightbulb, emoji: "💡", colorClass: "bg-violet-100 hover:bg-violet-200 text-violet-700" },
   { id: "diagrams", name: "Diagrams", icon: Image, emoji: "🖼️", colorClass: "bg-amber-100 hover:bg-amber-200 text-amber-700" },
 ];
 
@@ -30,11 +31,11 @@ interface SubjectTabsProps {
 
 const SubjectTabs = ({ selectedSubject, onSubjectSelect }: SubjectTabsProps) => {
   const [selectedScienceSubject, setSelectedScienceSubject] = useState("physics");
+  const [selectedReasoningSubject, setSelectedReasoningSubject] = useState("logical");
 
   const handleSubjectSelect = (subjectId: string) => {
     onSubjectSelect(subjectId);
     
-    // Smooth scroll to search area after selecting subject
     setTimeout(() => {
       const searchArea = document.getElementById('search-area');
       if (searchArea) {
@@ -48,8 +49,12 @@ const SubjectTabs = ({ selectedSubject, onSubjectSelect }: SubjectTabsProps) => 
 
   const handleScienceSubjectSelect = (scienceSubjectId: string) => {
     setSelectedScienceSubject(scienceSubjectId);
-    // Pass the specific science subject to parent
     onSubjectSelect(`science_${scienceSubjectId}`);
+  };
+
+  const handleReasoningSubjectSelect = (reasoningSubjectId: string) => {
+    setSelectedReasoningSubject(reasoningSubjectId);
+    onSubjectSelect(`reasoning_${reasoningSubjectId}`);
   };
 
   return (
@@ -88,6 +93,12 @@ const SubjectTabs = ({ selectedSubject, onSubjectSelect }: SubjectTabsProps) => 
         selectedSubSubject={selectedScienceSubject}
         onSubSubjectSelect={handleScienceSubjectSelect}
         isVisible={selectedSubject === "science" || selectedSubject.startsWith("science_")}
+      />
+
+      <ReasoningSubTabs
+        selectedSubSubject={selectedReasoningSubject}
+        onSubSubjectSelect={handleReasoningSubjectSelect}
+        isVisible={selectedSubject === "reasoning" || selectedSubject.startsWith("reasoning_")}
       />
     </>
   );
