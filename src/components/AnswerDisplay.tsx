@@ -1,7 +1,8 @@
+
 import React from "react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ThumbUp, ThumbDown, Refresh } from "lucide-react";
+import { ThumbsUp, ThumbsDown, RefreshCw } from "lucide-react";
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import ProfessionalLoader from "./ProfessionalLoader";
@@ -38,16 +39,16 @@ const AnswerDisplay: React.FC<AnswerDisplayProps> = ({ answer, isLoading, onRege
           <CardFooter className="flex justify-between items-center">
             <div className="flex space-x-2">
               <Button variant="outline" size="sm" onClick={() => onFeedback('helpful')}>
-                <ThumbUp className="h-4 w-4 mr-2" />
+                <ThumbsUp className="h-4 w-4 mr-2" />
                 Helpful
               </Button>
               <Button variant="outline" size="sm" onClick={() => onFeedback('not-helpful')}>
-                <ThumbDown className="h-4 w-4 mr-2" />
+                <ThumbsDown className="h-4 w-4 mr-2" />
                 Not Helpful
               </Button>
             </div>
             <Button onClick={onRegenerate} className="bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-700 hover:to-purple-700">
-              <Refresh className="h-4 w-4 mr-2" />
+              <RefreshCw className="h-4 w-4 mr-2" />
               Regenerate
             </Button>
           </CardFooter>

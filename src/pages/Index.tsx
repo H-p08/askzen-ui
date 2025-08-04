@@ -43,7 +43,7 @@ const Index = () => {
       console.log("Professional AI response received:", {
         confidence: response.confidence,
         difficulty: response.difficulty,
-        readTime: response.estimatedReadTime
+        estimatedReadTime: response.estimatedReadTime
       });
       
       setCurrentAnswer(response.answer);
@@ -54,12 +54,12 @@ const Index = () => {
         keyInsights: response.keyInsights,
         actionables: response.actionables,
         difficulty: response.difficulty,
-        readTime: response.estimatedReadTime
+        estimatedReadTime: response.estimatedReadTime
       });
       
       toast({
         title: "🎉 Professional Response Ready!",
-        description: `${response.difficulty} level • ${response.readTime} min read • ${Math.round(response.confidence * 100)}% confidence`,
+        description: `${response.difficulty} level • ${response.estimatedReadTime} min read • ${Math.round(response.confidence * 100)}% confidence`,
       });
       
     } catch (error) {
