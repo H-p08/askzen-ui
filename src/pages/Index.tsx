@@ -6,59 +6,67 @@ import SearchArea from "@/components/SearchArea";
 import AnswerDisplay from "@/components/AnswerDisplay";
 import Footer from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
-import { aiService } from "@/services/aiService";
+import { enhancedAIService } from "@/services/enhancedAIService";
 
 const Index = () => {
   const [selectedSubject, setSelectedSubject] = useState("math");
   const [currentAnswer, setCurrentAnswer] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [lastQuery, setLastQuery] = useState<string>("");
+  const [currentMetadata, setCurrentMetadata] = useState<any>(null);
   const { toast } = useToast();
 
-  console.log("Index component rendered with:", {
+  console.log("Enhanced Index component rendered with:", {
     selectedSubject,
     currentAnswer: currentAnswer ? `${currentAnswer.substring(0, 50)}...` : null,
     isLoading
   });
 
   const handleSearch = async (query: string) => {
-    console.log("handleSearch called with query:", query);
+    console.log("handleSearch called with enhanced AI:", query);
     
     setIsLoading(true);
     setLastQuery(query);
-    setCurrentAnswer(null); // Clear previous answer
+    setCurrentAnswer(null);
+    setCurrentMetadata(null);
     
     try {
-      console.log("Calling offline AI service for question:", query);
-      const response = await aiService.answerQuestion(query, selectedSubject);
+      console.log("Calling enhanced AI service for question:", query);
+      const response = await enhancedAIService.answerQuestion(query, selectedSubject);
       
-      console.log("AI response received:", {
+      console.log("Enhanced AI response received:", {
         hasAnswer: !!response.answer,
-        hasError: !!response.error,
-        answerLength: response.answer?.length || 0
+        confidence: response.confidence,
+        relatedTopics: response.relatedTopics,
+        followUpQuestions: response.followUpQuestions?.length || 0
       });
       
       setCurrentAnswer(response.answer);
+      setCurrentMetadata({
+        confidence: response.confidence,
+        relatedTopics: response.relatedTopics,
+        followUpQuestions: response.followUpQuestions
+      });
       
       if (!response.error) {
         toast({
-          title: "उत्तर तैयार!",
-          description: "आपका intelligent उत्तर तैयार है।",
+          title: "🎉 बेहतरीन उत्तर तैयार!",
+          description: `${Math.round(response.confidence * 100)}% confidence के साथ comprehensive answer।`,
         });
       } else {
         console.log("Response has error:", response.error);
         toast({
-          title: "Error",
-          description: "कुछ technical issue हुआ है। कृपया दोबारा कोशिश करें।",
+          title: "⚠️ Technical Issue",
+          description: "कुछ समस्या हुई है। कृपया दोबारा प्रयास करें।",
           variant: "destructive",
         });
       }
     } catch (error) {
-      console.error("Search error:", error);
-      setCurrentAnswer("क्षमा करें, आपके प्रश्न को process करते समय error आया। कृपया दोबारा कोशिश करें।");
+      console.error("Enhanced search error:", error);
+      setCurrentAnswer("क्षमा करें, technical issue के कारण आपका प्रश्न process नहीं हो सका। कृपया थोड़ी देर बाद दोबारा कोशिश करें।");
       toast({
-        title: "Error",
-        description: "Response generate करने में failed। कृपया दोबारा try करें।",
+        title: "❌ Error Occurred",
+        description: "Enhanced AI service में temporary issue है।",
         variant: "destructive",
       });
     } finally {
@@ -68,54 +76,85 @@ const Index = () => {
 
   const handleImageUpload = async (files: FileList) => {
     const fileNames = Array.from(files).map(f => f.name).join(", ");
-    console.log("handleImageUpload called with files:", fileNames);
+    console.log("Enhanced handleImageUpload called:", fileNames);
     
     toast({
-      title: "Images uploaded!",
-      description: `Processing: ${fileNames}`,
+      title: "📸 Images Uploaded Successfully!",
+      description: `Processing ${files.length} file(s) with enhanced AI...`,
     });
     
     setIsLoading(true);
     
     try {
-      // Image analysis with offline AI
-      const imageAnalysisQuery = `I have uploaded image files: ${fileNames}. Please provide guidance on what academic help I can get for image-based questions in ${selectedSubject}.`;
+      const imageAnalysisQuery = `मैंने ये image files upload की हैं: ${fileNames}। कृपया ${selectedSubject} subject में इन images के साथ कैसे मदद मिल सकती है, detailed guidance दें। साथ ही बताएं कि image-based questions कैसे पूछूं।`;
       
-      const response = await aiService.answerQuestion(imageAnalysisQuery, selectedSubject);
+      const response = await enhancedAIService.answerQuestion(imageAnalysisQuery, selectedSubject);
       
-      console.log("Image analysis response:", response);
-      setCurrentAnswer(`**Uploaded Files:** ${fileNames}\n\n${response.answer}\n\n**Note:** पूरी image analysis के लिए, कृपया image में दिखाई गई content को text में describe करें, तो मैं detailed help दे सकूंगा।`);
-      setLastQuery(`Image analysis: ${fileNames}`);
+      console.log("Enhanced image analysis response:", response);
+      
+      const enhancedImageResponse = `# 📸 **Image Analysis - ${selectedSubject.toUpperCase()}**
+
+**Uploaded Files:** ${fileNames}
+
+${response.answer}
+
+## **💡 Image-based Learning Tips:**
+• **Describe** करें कि image में क्या दिख रहा है
+• **Specific questions** पूछें image content के बारे में  
+• **Step-by-step** explanation चाहिए तो बताएं
+• **Similar problems** solve करना चाहते हैं तो specify करें
+
+## **🎯 Next Steps:**
+Image की content को describe करें या specific questions पूछें। Enhanced AI आपको detailed help देगा!`;
+
+      setCurrentAnswer(enhancedImageResponse);
+      setLastQuery(`Enhanced Image Analysis: ${fileNames}`);
+      setCurrentMetadata(response);
       
     } catch (error) {
-      console.error("Image upload error:", error);
-      setCurrentAnswer(`**Uploaded Files:** ${fileNames}\n\nमैं आपकी uploaded files देख सकता हूं। कृपया image में जो content है उसे describe करें या specific questions पूछें, तो मैं detailed help दूंगा।\n\n**उदाहरण:** "इस math problem को solve करें" या "इस diagram को explain करें"`);
+      console.error("Enhanced image upload error:", error);
+      setCurrentAnswer(`# 📸 **Files Successfully Uploaded**
+
+**Files:** ${fileNames}
+
+Enhanced AI system ने आपकी files successfully receive की हैं। 
+
+## **🚀 How to Get Best Help:**
+1. **Describe** करें कि images में क्या content है
+2. **Specific questions** पूछें 
+3. **Subject context** provide करें
+4. **Expected output** बताएं
+
+**Example:** "इस math problem को solve करें" या "इस diagram को explain करें"
+
+Enhanced AI आपको comprehensive और detailed help प्रदान करेगा!`);
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleRegenerate = async () => {
-    console.log("handleRegenerate called with lastQuery:", lastQuery);
+    console.log("Enhanced handleRegenerate called:", lastQuery);
     if (lastQuery) {
       setIsLoading(true);
       
       try {
-        const regenerationPrompt = `कृपया इस प्रश्न का एक alternative explanation या different approach प्रदान करें: ${lastQuery}`;
-        const response = await aiService.answerQuestion(regenerationPrompt, selectedSubject);
+        const regenerationPrompt = `कृपया इस प्रश्न का एक अलग approach और more detailed explanation के साथ answer दें: ${lastQuery}. पिछले response से different perspective use करें।`;
+        const response = await enhancedAIService.answerQuestion(regenerationPrompt, selectedSubject);
         
-        console.log("Regenerated response received");
+        console.log("Enhanced regenerated response received");
         setCurrentAnswer(response.answer);
+        setCurrentMetadata(response);
         
         toast({
-          title: "नया उत्तर तैयार!",
-          description: "यहाँ आपके प्रश्न पर एक नया perspective है।",
+          title: "🔄 नया Enhanced Answer!",
+          description: "आपके प्रश्न पर fresh perspective के साथ detailed response।",
         });
       } catch (error) {
-        console.error("Regeneration error:", error);
+        console.error("Enhanced regeneration error:", error);
         toast({
-          title: "Error", 
-          description: "Answer regenerate करने में failed। कृपया दोबारा try करें।",
+          title: "❌ Regeneration Failed", 
+          description: "Enhanced AI service में issue है। कृपया दोबारा try करें।",
           variant: "destructive",
         });
       } finally {
@@ -125,13 +164,19 @@ const Index = () => {
   };
 
   const handleFeedback = (type: 'helpful' | 'not-helpful') => {
-    console.log("handleFeedback called with type:", type);
-    toast({
-      title: type === 'helpful' ? "धन्यवाद!" : "Feedback मिला",
-      description: type === 'helpful' 
-        ? "हमें खुशी है कि उत्तर helpful था!" 
-        : "हम आपके feedback का use करके responses improve करेंगे।",
-    });
+    console.log("Enhanced handleFeedback called:", type);
+    
+    if (type === 'helpful') {
+      toast({
+        title: "🙏 Thank You!",
+        description: "आपका positive feedback Enhanced AI को improve करने में help करता है!",
+      });
+    } else {
+      toast({
+        title: "📝 Feedback Noted",
+        description: "हम आपके feedback का use करके AI responses को और भी बेहतर बनाएंगे।",
+      });
+    }
   };
 
   return (
@@ -142,11 +187,14 @@ const Index = () => {
         onSubjectSelect={setSelectedSubject} 
       />
       
-      {/* Welcome message for no API key needed */}
+      {/* Enhanced AI Status */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <div className="flex items-center justify-center space-x-2 text-sm text-green-600 bg-green-50 rounded-lg p-3">
-          <span className="text-lg">🤖</span>
-          <span>Offline AI Ready - कोई API key की जरूरत नहीं! किसी भी विषय पर प्रश्न पूछें।</span>
+        <div className="flex items-center justify-center space-x-3 text-sm bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg p-3">
+          <span className="text-2xl">🚀</span>
+          <div className="text-center">
+            <div className="font-semibold text-green-700">Enhanced AI System Active</div>
+            <div className="text-green-600">Advanced reasoning • Comprehensive answers • Multi-language support</div>
+          </div>
         </div>
       </div>
       
@@ -161,6 +209,7 @@ const Index = () => {
         isLoading={isLoading}
         onRegenerate={handleRegenerate}
         onFeedback={handleFeedback}
+        metadata={currentMetadata}
       />
       
       <Footer />
