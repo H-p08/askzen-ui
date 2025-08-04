@@ -1,3 +1,4 @@
+import { enhancedScienceService } from './enhancedScienceService';
 
 interface AIResponse {
   answer: string;
@@ -84,112 +85,6 @@ export class EnhancedAIService {
           difficulty: 'basic',
           keywords: ['algebra', 'variable', 'equation', 'solve', 'linear'],
           examples: ['2x + 5 = 13', 'x² - 4 = 0', 'system of equations']
-        },
-
-        'geometry_fundamentals': {
-          content: `# 📐 **Geometry - आकार और स्थान का विज्ञान**
-
-## **🔺 Basic Shapes (मूलभूत आकृतियां):**
-
-### **Triangle (त्रिभुज):**
-- **Area = ½ × base × height**
-- **Perimeter = a + b + c**
-- **Types:** Equilateral, Isosceles, Scalene
-
-### **Rectangle (आयत):**
-- **Area = length × width**
-- **Perimeter = 2(l + w)**
-
-### **Circle (वृत्त):**
-- **Area = πr²**
-- **Circumference = 2πr**
-- **π ≈ 3.14159**
-
-## **🎯 Important Theorems:**
-
-### **Pythagoras Theorem:**
-**a² + b² = c²** (Right triangle में)
-
-**Example:**
-- एक triangle की भुजाएं 3, 4, और 5 cm हैं
-- 3² + 4² = 9 + 16 = 25 = 5²
-- यह एक right triangle है!
-
-## **📏 Measurement Units:**
-- **Length:** mm, cm, m, km
-- **Area:** cm², m², hectare
-- **Volume:** cm³, liter, m³
-
-## **🏗️ Practical Applications:**
-- **Construction:** Building measurements
-- **Art & Design:** Proportions
-- **Navigation:** Distance calculations
-- **Sports:** Field dimensions`,
-          difficulty: 'basic',
-          keywords: ['geometry', 'triangle', 'circle', 'area', 'perimeter', 'pythagoras'],
-          examples: ['area of triangle', 'pythagorean theorem', 'circle circumference']
-        }
-      },
-
-      science: {
-        'physics_basics': {
-          content: `# 🔬 **Physics - प्रकृति के नियमों का अध्ययन**
-
-## **⚡ Fundamental Forces:**
-
-### **1. Gravity (गुरुत्वाकर्षण):**
-- **Formula:** F = mg
-- **g = 9.8 m/s²** (Earth पर)
-- **Applications:** Objects falling, planetary motion
-
-### **2. Electromagnetic Force:**
-- **Electricity:** Current, Voltage, Resistance
-- **Magnetism:** North-South poles
-- **Light:** Electromagnetic waves
-
-## **🚗 Motion & Mechanics:**
-
-### **Newton's Laws:**
-1. **First Law:** Object at rest stays at rest (Inertia)
-2. **Second Law:** F = ma (Force = mass × acceleration)
-3. **Third Law:** Every action has equal opposite reaction
-
-### **Key Formulas:**
-- **Speed = Distance/Time**
-- **Acceleration = Change in velocity/Time**
-- **Kinetic Energy = ½mv²**
-- **Potential Energy = mgh**
-
-## **💡 Energy & Power:**
-
-### **Types of Energy:**
-- **Kinetic:** Moving objects
-- **Potential:** Stored energy
-- **Chemical:** Batteries, food
-- **Nuclear:** Atoms
-- **Solar:** Sun's radiation
-
-### **Conservation Law:**
-Energy cannot be created or destroyed, only transformed!
-
-## **🌊 Waves & Sound:**
-- **Sound Speed:** ~343 m/s in air
-- **Light Speed:** 3×10⁸ m/s
-- **Frequency × Wavelength = Speed**
-
-## **🔬 Modern Physics:**
-- **Atoms:** Protons, neutrons, electrons
-- **Quantum:** Energy in packets
-- **Relativity:** E = mc²
-
-## **📱 Daily Life Applications:**
-- **Smartphones:** Electricity, magnetism, waves
-- **Cars:** Mechanics, combustion
-- **Weather:** Pressure, temperature
-- **Cooking:** Heat transfer`,
-          difficulty: 'intermediate',
-          keywords: ['physics', 'force', 'energy', 'motion', 'newton', 'gravity'],
-          examples: ['F=ma', 'conservation of energy', 'wave equation']
         }
       },
 
@@ -387,7 +282,17 @@ Energy cannot be created or destroyed, only transformed!
       await new Promise(resolve => setTimeout(resolve, 1500)); // Thinking time
       
       const analysis = this.analyzeQuestion(question, subject);
-      const answer = this.generateEnhancedAnswer(question, subject, analysis);
+      let answer = '';
+      
+      // Handle science sub-subjects
+      if (subject.startsWith('science_')) {
+        const scienceSubject = subject.split('_')[1];
+        console.log("Processing science subject:", scienceSubject);
+        answer = enhancedScienceService.getScienceAnswer(question, scienceSubject);
+      } else {
+        answer = this.generateEnhancedAnswer(question, subject, analysis);
+      }
+      
       const relatedTopics = this.findRelatedTopics(question, subject);
       const followUpQuestions = this.generateFollowUpQuestions(question, subject);
       
@@ -544,7 +449,9 @@ Science सिर्फ textbook में नहीं है - यह हम�
 - **Medicine:** Biology और chemistry
 - **Technology:** Engineering applications
 
-**आपका specific science question क्या है? मैं detailed scientific explanation दूंगा।**`;
+**आपका specific science question क्या है? मैं detailed scientific explanation दूंगा।**
+
+**💡 Tip:** Science के specific areas (Physics, Chemistry, Biology) के लिए उनके dedicated tabs का उपयोग करें!`;
   }
 
   private generateEnglishAnswer(question: string, analysis: any): string {
@@ -677,21 +584,36 @@ Regular practice से logical thinking improve होती है।
   private findRelatedTopics(question: string, subject: string): string[] {
     const topics: string[] = [];
     
-    switch (subject) {
-      case 'math':
-        topics.push('Algebra', 'Geometry', 'Calculus', 'Statistics', 'Trigonometry');
-        break;
-      case 'science':
-        topics.push('Physics', 'Chemistry', 'Biology', 'Earth Science', 'Astronomy');
-        break;
-      case 'english':
-        topics.push('Grammar', 'Vocabulary', 'Writing', 'Literature', 'Communication');
-        break;
-      case 'reasoning':
-        topics.push('Logic', 'Critical Thinking', 'Problem Solving', 'Decision Making');
-        break;
-      default:
-        topics.push('General Knowledge', 'Current Affairs', 'History', 'Geography');
+    if (subject.startsWith('science_')) {
+      const scienceSubject = subject.split('_')[1];
+      switch (scienceSubject) {
+        case 'physics':
+          topics.push('Motion & Forces', 'Energy & Power', 'Electricity', 'Waves & Sound');
+          break;
+        case 'chemistry':
+          topics.push('Atomic Structure', 'Chemical Reactions', 'Acids & Bases', 'Periodic Table');
+          break;
+        case 'biology':
+          topics.push('Cell Structure', 'Genetics', 'Evolution', 'Ecology');
+          break;
+      }
+    } else {
+      switch (subject) {
+        case 'math':
+          topics.push('Algebra', 'Geometry', 'Calculus', 'Statistics', 'Trigonometry');
+          break;
+        case 'science':
+          topics.push('Physics', 'Chemistry', 'Biology', 'Earth Science', 'Astronomy');
+          break;
+        case 'english':
+          topics.push('Grammar', 'Vocabulary', 'Writing', 'Literature', 'Communication');
+          break;
+        case 'reasoning':
+          topics.push('Logic', 'Critical Thinking', 'Problem Solving', 'Decision Making');
+          break;
+        default:
+          topics.push('General Knowledge', 'Current Affairs', 'History', 'Geography');
+      }
     }
     
     return topics.slice(0, 3);
@@ -700,34 +622,43 @@ Regular practice से logical thinking improve होती है।
   private generateFollowUpQuestions(question: string, subject: string): string[] {
     const questions: string[] = [];
     
-    switch (subject) {
-      case 'math':
-        questions.push(
-          'क्या आप इसे अलग method से solve करना चाहेंगे?',
-          'इस concept के real-world applications क्या हैं?',
-          'Related math problems practice करना चाहेंगे?'
-        );
-        break;
-      case 'science':
-        questions.push(
-          'इस phenomenon की scientific explanation चाहिए?',
-          'Daily life में इसका application कैसे देखते हैं?',
-          'Related experiments के बारे में जानना चाहेंगे?'
-        );
-        break;
-      case 'english':
-        questions.push(
-          'Grammar rules और examples चाहिए?',
-          'Writing skills improve करने के tips चाहिए?',
-          'Vocabulary building techniques जानना चाहते हैं?'
-        );
-        break;
-      default:
-        questions.push(
-          'इस topic पर और detail चाहिए?',
-          'Related concepts के बारे में जानना चाहते हैं?',
-          'Practical applications discuss करें?'
-        );
+    if (subject.startsWith('science_')) {
+      const scienceSubject = subject.split('_')[1];
+      questions.push(
+        `${scienceSubject} में इस concept का practical application क्या है?`,
+        `क्या आप इससे related experiments जानना चाहेंगे?`,
+        `Daily life में यह कैसे useful है?`
+      );
+    } else {
+      switch (subject) {
+        case 'math':
+          questions.push(
+            'क्या आप इसे अलग method से solve करना चाहेंगे?',
+            'इस concept के real-world applications क्या हैं?',
+            'Related math problems practice करना चाहेंगे?'
+          );
+          break;
+        case 'science':
+          questions.push(
+            'इस phenomenon की scientific explanation चाहिए?',
+            'Daily life में इसका application कैसे देखते हैं?',
+            'Related experiments के बारे में जानना चाहेंगे?'
+          );
+          break;
+        case 'english':
+          questions.push(
+            'Grammar rules और examples चाहिए?',
+            'Writing skills improve करने के tips चाहिए?',
+            'Vocabulary building techniques जानना चाहते हैं?'
+          );
+          break;
+        default:
+          questions.push(
+            'इस topic पर और detail चाहिए?',
+            'Related concepts के बारे में जानना चाहते हैं?',
+            'Practical applications discuss करें?'
+          );
+      }
     }
     
     return questions;
@@ -749,6 +680,9 @@ Regular practice से logical thinking improve होती है।
     const learningTips = {
       math: '**🧮 Math Tip:** Practice regularly करें और concepts को real problems पर apply करें।',
       science: '**🔬 Science Tip:** Observation और experimentation से सीखें, theory को practice से connect करें।',
+      science_physics: '**⚛️ Physics Tip:** Formulas को real-world examples से connect करें और daily phenomena observe करें।',
+      science_chemistry: '**🧪 Chemistry Tip:** Chemical reactions को everyday examples से relate करें और safety के साथ observe करें।',
+      science_biology: '**🧬 Biology Tip:** Living organisms को observe करें और life processes को understand करें।',
       english: '**📚 English Tip:** Daily reading और speaking practice से fluency improve होगी।',
       reasoning: '**🧠 Reasoning Tip:** Different perspectives से think करें और logic को question करें।',
       geography: '**🗺️ Geography Tip:** Maps use करें और current events को geography से relate करें।',

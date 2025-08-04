@@ -179,6 +179,14 @@ Enhanced AI आपको comprehensive और detailed help प्रदान �
     }
   };
 
+  // Smooth scroll to top function
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
+
   return (
     <div className="min-h-screen">
       <Header />
@@ -189,7 +197,7 @@ Enhanced AI आपको comprehensive और detailed help प्रदान �
       
       {/* Enhanced AI Status */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <div className="flex items-center justify-center space-x-3 text-sm bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg p-3">
+        <div className="flex items-center justify-center space-x-3 text-sm bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg p-3 animate-fade-in">
           <span className="text-2xl">🚀</span>
           <div className="text-center">
             <div className="font-semibold text-green-700">Enhanced AI System Active</div>
@@ -198,11 +206,13 @@ Enhanced AI आपको comprehensive और detailed help प्रदान �
         </div>
       </div>
       
-      <SearchArea 
-        selectedSubject={selectedSubject}
-        onSearch={handleSearch}
-        onImageUpload={handleImageUpload}
-      />
+      <div id="search-area">
+        <SearchArea 
+          selectedSubject={selectedSubject}
+          onSearch={handleSearch}
+          onImageUpload={handleImageUpload}
+        />
+      </div>
       
       <AnswerDisplay 
         answer={currentAnswer}
@@ -211,6 +221,15 @@ Enhanced AI आपको comprehensive और detailed help प्रदान �
         onFeedback={handleFeedback}
         metadata={currentMetadata}
       />
+      
+      {/* Smooth Scroll to Top Button */}
+      <button
+        onClick={scrollToTop}
+        className="fixed bottom-6 right-6 bg-primary text-primary-foreground p-3 rounded-full shadow-lg hover:scale-110 transition-all duration-300 z-50 animate-bounce"
+        aria-label="Scroll to top"
+      >
+        ⬆️
+      </button>
       
       <Footer />
     </div>
