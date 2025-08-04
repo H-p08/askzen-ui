@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import Header from "@/components/Header";
 import EnhancedSubjectTabs from "@/components/EnhancedSubjectTabs";
@@ -7,6 +6,10 @@ import AnswerDisplay from "@/components/AnswerDisplay";
 import NotesSection from "@/components/NotesSection";
 import ConversationHistory from "@/components/ConversationHistory";
 import SmartSuggestions from "@/components/SmartSuggestions";
+import VisionAnalysis from "@/components/VisionAnalysis";
+import CodeAssistant from "@/components/CodeAssistant";
+import LearningPath from "@/components/LearningPath";
+import EnhancedChatInterface from "@/components/EnhancedChatInterface";
 import Footer from "@/components/Footer";
 import ScrollToTopButton from "@/components/ScrollToTopButton";
 import { useToast } from "@/hooks/use-toast";
@@ -15,7 +18,19 @@ import { conversationHistoryService } from "@/services/conversationHistoryServic
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, MessageSquare, History, Zap, Star } from "lucide-react";
+import { 
+  BookOpen, 
+  MessageSquare, 
+  History, 
+  Zap, 
+  Star, 
+  Eye, 
+  Code, 
+  Target, 
+  Brain,
+  Lightbulb,
+  Sparkles
+} from "lucide-react";
 
 const Index = () => {
   const [selectedSubject, setSelectedSubject] = useState("math");
@@ -23,8 +38,7 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [lastQuery, setLastQuery] = useState<string>("");
   const [currentMetadata, setCurrentMetadata] = useState<any>(null);
-  const [showNotes, setShowNotes] = useState(false);
-  const [showHistory, setShowHistory] = useState(false);
+  const [activeSection, setActiveSection] = useState<string>("assistant");
   const [currentThreadId, setCurrentThreadId] = useState<string | null>(null);
   const [recentQueries, setRecentQueries] = useState<string[]>([]);
   const { toast } = useToast();
@@ -33,8 +47,7 @@ const Index = () => {
     selectedSubject,
     hasAnswer: !!currentAnswer,
     isLoading,
-    showHistory,
-    showNotes
+    activeSection
   });
 
   const handleSearch = async (query: string) => {
@@ -71,7 +84,6 @@ const Index = () => {
         contextUsed: response.contextUsed
       });
 
-      // Enhanced toast with quality indicators
       const qualityEmoji = response.responseQuality === 'excellent' ? '🌟' : 
                           response.responseQuality === 'good' ? '⭐' : '✨';
       const contextEmoji = response.contextUsed ? '🔗' : '🆕';
@@ -194,6 +206,21 @@ Enhanced Professional AI comprehensive और detailed help प्रदान �
     }
   };
 
+  const handleSpecialResponse = (response: string) => {
+    setCurrentAnswer(response);
+    setActiveSection("assistant");
+  };
+
+  const sections = [
+    { id: "assistant", name: "AI Assistant", icon: MessageSquare, color: "text-blue-600" },
+    { id: "vision", name: "Vision AI", icon: Eye, color: "text-purple-600" },
+    { id: "code", name: "Code Assistant", icon: Code, color: "text-slate-600" },
+    { id: "learning", name: "Learning Path", icon: Target, color: "text-green-600" },
+    { id: "chat", name: "Enhanced Chat", icon: Brain, color: "text-orange-600" },
+    { id: "history", name: "History", icon: History, color: "text-indigo-600" },
+    { id: "notes", name: "Notes", icon: BookOpen, color: "text-teal-600" }
+  ];
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -216,9 +243,13 @@ Enhanced Professional AI comprehensive और detailed help प्रदान �
                 Enhanced Mini Gemini • Professional AI System
               </div>
               <div className="text-emerald-700 font-medium">
-                Context-Aware • Multi-Modal • Smart Suggestions • Conversation History
+                Vision AI • Code Assistant • Learning Paths • Enhanced Chat • Multi-Modal Analysis
               </div>
               <div className="flex justify-center items-center space-x-4 mt-2">
+                <Badge variant="secondary" className="text-xs">
+                  <Sparkles className="h-3 w-3 mr-1" />
+                  Advanced Features
+                </Badge>
                 <Badge variant="secondary" className="text-xs">
                   <Zap className="h-3 w-3 mr-1" />
                   Real-time Context
@@ -228,8 +259,8 @@ Enhanced Professional AI comprehensive और detailed help प्रदान �
                   Quality Assured
                 </Badge>
                 <Badge variant="secondary" className="text-xs">
-                  <MessageSquare className="h-3 w-3 mr-1" />
-                  Smart Suggestions
+                  <Lightbulb className="h-3 w-3 mr-1" />
+                  Adaptive Learning
                 </Badge>
               </div>
             </div>
@@ -247,47 +278,35 @@ Enhanced Professional AI comprehensive और detailed help प्रदान �
           />
         </div>
         
-        {/* Enhanced Toggle Buttons */}
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-4">
+        {/* Enhanced Section Toggle Buttons */}
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-4">
           <Card className="p-4 bg-gradient-to-r from-muted/10 to-background border border-border/30">
-            <div className="flex justify-center space-x-3">
-              <Button
-                variant={!showNotes && !showHistory ? "default" : "outline"}
-                onClick={() => {setShowNotes(false); setShowHistory(false);}}
-                className="flex items-center space-x-2 hover:scale-105 transition-transform"
-              >
-                <MessageSquare className="h-4 w-4" />
-                <span>AI Assistant</span>
-                {currentMetadata?.responseQuality && (
-                  <Badge variant="secondary" className="text-xs">
-                    {currentMetadata.responseQuality}
-                  </Badge>
-                )}
-              </Button>
-              
-              <Button
-                variant={showHistory ? "default" : "outline"}
-                onClick={() => {setShowHistory(!showHistory); setShowNotes(false);}}
-                className="flex items-center space-x-2 hover:scale-105 transition-transform"
-              >
-                <History className="h-4 w-4" />
-                <span>History</span>
-              </Button>
-              
-              <Button
-                variant={showNotes ? "default" : "outline"}
-                onClick={() => {setShowNotes(!showNotes); setShowHistory(false);}}
-                className="flex items-center space-x-2 hover:scale-105 transition-transform"
-              >
-                <BookOpen className="h-4 w-4" />
-                <span>Notes</span>
-              </Button>
+            <div className="flex flex-wrap justify-center gap-2">
+              {sections.map(section => {
+                const Icon = section.icon;
+                return (
+                  <Button
+                    key={section.id}
+                    variant={activeSection === section.id ? "default" : "outline"}
+                    onClick={() => setActiveSection(section.id)}
+                    className="flex items-center space-x-2 hover:scale-105 transition-transform"
+                  >
+                    <Icon className={`h-4 w-4 ${activeSection === section.id ? 'text-white' : section.color}`} />
+                    <span>{section.name}</span>
+                    {section.id === "assistant" && currentMetadata?.responseQuality && (
+                      <Badge variant="secondary" className="text-xs">
+                        {currentMetadata.responseQuality}
+                      </Badge>
+                    )}
+                  </Button>
+                );
+              })}
             </div>
           </Card>
         </div>
 
-        {/* Smart Suggestions */}
-        {!showNotes && !showHistory && !currentAnswer && (
+        {/* Smart Suggestions - only show for assistant mode when no answer */}
+        {activeSection === "assistant" && !currentAnswer && (
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
             <SmartSuggestions 
               selectedSubject={selectedSubject}
@@ -297,13 +316,9 @@ Enhanced Professional AI comprehensive और detailed help प्रदान �
           </div>
         )}
         
-        {/* Content Display */}
-        {showNotes ? (
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
-            <NotesSection selectedSubject={selectedSubject} />
-          </div>
-        ) : (
-          !showHistory && (
+        {/* Content Display - Enhanced with new sections */}
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
+          {activeSection === "assistant" && (
             <AnswerDisplay 
               answer={currentAnswer}
               isLoading={isLoading}
@@ -311,16 +326,47 @@ Enhanced Professional AI comprehensive और detailed help प्रदान �
               onFeedback={handleFeedback}
               metadata={currentMetadata}
             />
-          )
-        )}
+          )}
+          
+          {activeSection === "vision" && (
+            <VisionAnalysis
+              selectedSubject={selectedSubject}
+              onAnalysisComplete={handleSpecialResponse}
+            />
+          )}
+          
+          {activeSection === "code" && (
+            <CodeAssistant
+              onCodeAnalysis={handleSpecialResponse}
+            />
+          )}
+          
+          {activeSection === "learning" && (
+            <LearningPath
+              selectedSubject={selectedSubject}
+              onPathGenerate={handleSpecialResponse}
+            />
+          )}
+          
+          {activeSection === "chat" && (
+            <EnhancedChatInterface
+              selectedSubject={selectedSubject}
+              onChatResponse={handleSpecialResponse}
+            />
+          )}
+          
+          {activeSection === "notes" && (
+            <NotesSection selectedSubject={selectedSubject} />
+          )}
+        </div>
         
         <Footer />
       </div>
       
       {/* Conversation History Sidebar */}
       <ConversationHistory
-        isOpen={showHistory}
-        onClose={() => setShowHistory(false)}
+        isOpen={activeSection === "history"}
+        onClose={() => setActiveSection("assistant")}
         onThreadSelect={handleThreadSelect}
         currentThreadId={currentThreadId}
       />

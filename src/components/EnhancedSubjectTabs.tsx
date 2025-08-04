@@ -13,7 +13,13 @@ import {
   PenTool,
   Zap,
   MessageSquare,
-  FileText
+  FileText,
+  Eye,
+  Target,
+  Sparkles,
+  Bot,
+  GraduationCap,
+  Workflow
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -30,6 +36,7 @@ interface Subject {
   description: string;
   isNew?: boolean;
   isPremium?: boolean;
+  isAdvanced?: boolean;
 }
 
 const subjects: Subject[] = [
@@ -66,13 +73,33 @@ const subjects: Subject[] = [
     description: "Logical और analytical thinking"
   },
   { 
+    id: "vision", 
+    name: "Vision AI", 
+    icon: Eye, 
+    emoji: "👁️", 
+    colorClass: "bg-purple-100 hover:bg-purple-200 text-purple-700",
+    description: "Advanced image और visual analysis",
+    isNew: true,
+    isAdvanced: true
+  },
+  { 
     id: "code", 
     name: "Code Analysis", 
     icon: Code, 
     emoji: "💻", 
     colorClass: "bg-slate-100 hover:bg-slate-200 text-slate-700",
     description: "Programming और code review",
-    isNew: true
+    isAdvanced: true
+  },
+  { 
+    id: "learning", 
+    name: "Learning Path", 
+    icon: Target, 
+    emoji: "🎯", 
+    colorClass: "bg-green-100 hover:bg-green-200 text-green-700",
+    description: "Personalized learning roadmaps",
+    isNew: true,
+    isAdvanced: true
   },
   { 
     id: "research", 
@@ -81,7 +108,7 @@ const subjects: Subject[] = [
     emoji: "🔍", 
     colorClass: "bg-indigo-100 hover:bg-indigo-200 text-indigo-700",
     description: "Deep research और data analysis",
-    isNew: true
+    isAdvanced: true
   },
   { 
     id: "creative", 
@@ -89,8 +116,37 @@ const subjects: Subject[] = [
     icon: PenTool, 
     emoji: "✍️", 
     colorClass: "bg-pink-100 hover:bg-pink-200 text-pink-700",
-    description: "Creative content और storytelling",
-    isNew: true
+    description: "Creative content और storytelling"
+  },
+  { 
+    id: "chat", 
+    name: "Enhanced Chat", 
+    icon: Bot, 
+    emoji: "🤖", 
+    colorClass: "bg-emerald-100 hover:bg-emerald-200 text-emerald-700",
+    description: "Multi-mode conversational AI",
+    isNew: true,
+    isPremium: true
+  },
+  { 
+    id: "tutor", 
+    name: "AI Tutor", 
+    icon: GraduationCap, 
+    emoji: "🎓", 
+    colorClass: "bg-blue-100 hover:bg-blue-200 text-blue-700",
+    description: "Personalized teaching assistant",
+    isNew: true,
+    isPremium: true
+  },
+  { 
+    id: "workflow", 
+    name: "Smart Workflow", 
+    icon: Workflow, 
+    emoji: "⚡", 
+    colorClass: "bg-orange-100 hover:bg-orange-200 text-orange-700",
+    description: "Productivity और automation",
+    isNew: true,
+    isAdvanced: true
   },
   { 
     id: "geography", 
@@ -117,22 +173,12 @@ const subjects: Subject[] = [
     description: "Image analysis और diagrams"
   },
   { 
-    id: "chat", 
-    name: "Smart Chat", 
-    icon: MessageSquare, 
-    emoji: "💬", 
-    colorClass: "bg-cyan-100 hover:bg-cyan-200 text-cyan-700",
-    description: "General conversation और help",
-    isPremium: true
-  },
-  { 
     id: "summary", 
     name: "Summarizer", 
     icon: FileText, 
     emoji: "📄", 
     colorClass: "bg-teal-100 hover:bg-teal-200 text-teal-700",
-    description: "Text summarization और analysis",
-    isNew: true
+    description: "Text summarization और analysis"
   }
 ];
 
@@ -175,9 +221,9 @@ const EnhancedSubjectTabs = ({ selectedSubject, onSubjectSelect }: EnhancedSubje
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="text-center mb-3">
             <h2 className="text-lg font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              🚀 Mini Gemini • Advanced AI Assistant
+              🚀 Enhanced Mini Gemini • Advanced AI Assistant
             </h2>
-            <p className="text-sm text-muted-foreground">Choose your specialized AI assistant</p>
+            <p className="text-sm text-muted-foreground">Choose your specialized AI assistant with advanced capabilities</p>
           </div>
           
           <ScrollArea className="w-full">
@@ -205,6 +251,11 @@ const EnhancedSubjectTabs = ({ selectedSubject, onSubjectSelect }: EnhancedSubje
                     {subject.isPremium && (
                       <Badge className="absolute -top-2 -right-1 bg-yellow-500 text-white text-xs px-1 py-0">
                         PRO
+                      </Badge>
+                    )}
+                    {subject.isAdvanced && !subject.isNew && !subject.isPremium && (
+                      <Badge className="absolute -top-2 -right-1 bg-purple-500 text-white text-xs px-1 py-0">
+                        <Sparkles className="h-2 w-2" />
                       </Badge>
                     )}
                     
