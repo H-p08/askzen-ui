@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import Header from "@/components/Header";
 import EnhancedSubjectTabs from "@/components/EnhancedSubjectTabs";
@@ -12,6 +13,8 @@ import LearningPath from "@/components/LearningPath";
 import EnhancedChatInterface from "@/components/EnhancedChatInterface";
 import Footer from "@/components/Footer";
 import ScrollToTopButton from "@/components/ScrollToTopButton";
+import AdPlacement from "@/components/AdPlacement";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import { useToast } from "@/hooks/use-toast";
 import { professionalAIService } from "@/services/professionalAIService";
 import { conversationHistoryService } from "@/services/conversationHistoryService";
@@ -225,6 +228,11 @@ Enhanced Professional AI comprehensive और detailed help प्रदान �
     <div className="min-h-screen flex flex-col">
       <Header />
       
+      {/* Header Banner Ad */}
+      <div className="w-full flex justify-center py-2 bg-muted/30">
+        <AdPlacement position="header-banner" />
+      </div>
+      
       {/* Enhanced Fixed SubjectTabs */}
       <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border/50">
         <EnhancedSubjectTabs 
@@ -316,54 +324,68 @@ Enhanced Professional AI comprehensive और detailed help प्रदान �
           </div>
         )}
         
+        {/* Content Break Ad - Only show when there's content */}
+        {currentAnswer && (
+          <div className="w-full flex justify-center py-4">
+            <AdPlacement position="content-break" />
+          </div>
+        )}
+        
         {/* Content Display - Enhanced with new sections */}
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
-          {activeSection === "assistant" && (
-            <AnswerDisplay 
-              answer={currentAnswer}
-              isLoading={isLoading}
-              onRegenerate={handleRegenerate}
-              onFeedback={handleFeedback}
-              metadata={currentMetadata}
-            />
-          )}
-          
-          {activeSection === "vision" && (
-            <VisionAnalysis
-              selectedSubject={selectedSubject}
-              onAnalysisComplete={handleSpecialResponse}
-            />
-          )}
-          
-          {activeSection === "code" && (
-            <CodeAssistant
-              onCodeAnalysis={handleSpecialResponse}
-            />
-          )}
-          
-          {activeSection === "learning" && (
-            <LearningPath
-              selectedSubject={selectedSubject}
-              onPathGenerate={handleSpecialResponse}
-            />
-          )}
-          
-          {activeSection === "chat" && (
-            <EnhancedChatInterface
-              selectedSubject={selectedSubject}
-              onChatResponse={handleSpecialResponse}
-            />
-          )}
-          
-          {activeSection === "notes" && (
-            <NotesSection selectedSubject={selectedSubject} />
-          )}
+          <ErrorBoundary>
+            {activeSection === "assistant" && (
+              <AnswerDisplay 
+                answer={currentAnswer}
+                isLoading={isLoading}
+                onRegenerate={handleRegenerate}
+                onFeedback={handleFeedback}
+                metadata={currentMetadata}
+              />
+            )}
+            
+            {activeSection === "vision" && (
+              <VisionAnalysis
+                selectedSubject={selectedSubject}
+                onAnalysisComplete={handleSpecialResponse}
+              />
+            )}
+            
+            {activeSection === "code" && (
+              <CodeAssistant
+                onCodeAnalysis={handleSpecialResponse}
+              />
+            )}
+            
+            {activeSection === "learning" && (
+              <LearningPath
+                selectedSubject={selectedSubject}
+                onPathGenerate={handleSpecialResponse}
+              />
+            )}
+            
+            {activeSection === "chat" && (
+              <EnhancedChatInterface
+                selectedSubject={selectedSubject}
+                onChatResponse={handleSpecialResponse}
+              />
+            )}
+            
+            {activeSection === "notes" && (
+              <NotesSection selectedSubject={selectedSubject} />
+            )}
+          </ErrorBoundary>
+        </div>
+        
+        {/* Footer Banner Ad */}
+        <div className="w-full flex justify-center py-4 bg-muted/30">
+          <AdPlacement position="footer" />
         </div>
         
         <Footer />
       </div>
       
-      {/* Conversation History Sidebar */}
+      {/* Conversation History Sidebar with Sidebar Ads */}
       <ConversationHistory
         isOpen={activeSection === "history"}
         onClose={() => setActiveSection("assistant")}
