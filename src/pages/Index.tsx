@@ -4,7 +4,6 @@ import Header from "@/components/Header";
 import SubjectTabs from "@/components/SubjectTabs";
 import SearchArea from "@/components/SearchArea";
 import AnswerDisplay from "@/components/AnswerDisplay";
-import ApiKeyInput from "@/components/ApiKeyInput";
 import Footer from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
 import { aiService } from "@/services/aiService";
@@ -13,46 +12,24 @@ const Index = () => {
   const [selectedSubject, setSelectedSubject] = useState("math");
   const [currentAnswer, setCurrentAnswer] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [hasApiKey, setHasApiKey] = useState(false);
   const [lastQuery, setLastQuery] = useState<string>("");
   const { toast } = useToast();
 
   console.log("Index component rendered with:", {
     selectedSubject,
     currentAnswer: currentAnswer ? `${currentAnswer.substring(0, 50)}...` : null,
-    isLoading,
-    hasApiKey
+    isLoading
   });
-
-  const handleApiKeySet = (apiKey: string) => {
-    console.log("Setting API key...");
-    aiService.setApiKey(apiKey);
-    setHasApiKey(true);
-    toast({
-      title: "API Key सेट हो गया!",
-      description: "अब आप किसी भी प्रश्न का AI-powered उत्तर प्राप्त कर सकते हैं।",
-    });
-  };
 
   const handleSearch = async (query: string) => {
     console.log("handleSearch called with query:", query);
-    console.log("Has API key:", hasApiKey);
     
-    if (!hasApiKey) {
-      toast({
-        title: "API Key आवश्यक है",
-        description: "कृपया पहले अपनी Perplexity API key डालें।",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setIsLoading(true);
     setLastQuery(query);
     setCurrentAnswer(null); // Clear previous answer
     
     try {
-      console.log("Calling AI service for question:", query);
+      console.log("Calling offline AI service for question:", query);
       const response = await aiService.answerQuestion(query, selectedSubject);
       
       console.log("AI response received:", {
@@ -66,13 +43,13 @@ const Index = () => {
       if (!response.error) {
         toast({
           title: "उत्तर तैयार!",
-          description: "आपका AI-powered उत्तर तैयार है।",
+          description: "आपका intelligent उत्तर तैयार है।",
         });
       } else {
         console.log("Response has error:", response.error);
         toast({
-          title: "API Key की जांच करें",
-          description: "कृपया अपनी Perplexity API key की जांच करें और दोबारा कोशिश करें।",
+          title: "Error",
+          description: "कुछ technical issue हुआ है। कृपया दोबारा कोशिश करें।",
           variant: "destructive",
         });
       }
@@ -81,7 +58,7 @@ const Index = () => {
       setCurrentAnswer("क्षमा करें, आपके प्रश्न को process करते समय error आया। कृपया दोबारा कोशिश करें।");
       toast({
         title: "Error",
-        description: "AI response पाने में failed। कृपया अपनी API key check करें और दोबारा try करें।",
+        description: "Response generate करने में failed। कृपया दोबारा try करें।",
         variant: "destructive",
       });
     } finally {
@@ -101,18 +78,18 @@ const Index = () => {
     setIsLoading(true);
     
     try {
-      // For now, we'll analyze the image names and ask the AI about them
-      const imageAnalysisQuery = `I have uploaded the following image files: ${fileNames}. Based on the file names, can you help me understand what kind of academic content these might contain and how I can get help with them?`;
+      // Image analysis with offline AI
+      const imageAnalysisQuery = `I have uploaded image files: ${fileNames}. Please provide guidance on what academic help I can get for image-based questions in ${selectedSubject}.`;
       
       const response = await aiService.answerQuestion(imageAnalysisQuery, selectedSubject);
       
       console.log("Image analysis response:", response);
-      setCurrentAnswer(`I've received your uploaded files: ${fileNames}\n\n${response.answer}\n\nNote: Full image analysis requires additional setup. For now, I can help you with questions about the content if you describe what's in the images.`);
+      setCurrentAnswer(`**Uploaded Files:** ${fileNames}\n\n${response.answer}\n\n**Note:** पूरी image analysis के लिए, कृपया image में दिखाई गई content को text में describe करें, तो मैं detailed help दे सकूंगा।`);
       setLastQuery(`Image analysis: ${fileNames}`);
       
     } catch (error) {
       console.error("Image upload error:", error);
-      setCurrentAnswer(`I've received your uploaded files: ${fileNames}\n\nI can help you with questions about the content. Please describe what's in the images or ask specific questions about the subject matter.`);
+      setCurrentAnswer(`**Uploaded Files:** ${fileNames}\n\nमैं आपकी uploaded files देख सकता हूं। कृपया image में जो content है उसे describe करें या specific questions पूछें, तो मैं detailed help दूंगा।\n\n**उदाहरण:** "इस math problem को solve करें" या "इस diagram को explain करें"`);
     } finally {
       setIsLoading(false);
     }
@@ -120,7 +97,7 @@ const Index = () => {
 
   const handleRegenerate = async () => {
     console.log("handleRegenerate called with lastQuery:", lastQuery);
-    if (lastQuery && hasApiKey) {
+    if (lastQuery) {
       setIsLoading(true);
       
       try {
@@ -131,25 +108,19 @@ const Index = () => {
         setCurrentAnswer(response.answer);
         
         toast({
-          title: "उत्तर दोबारा generate हुआ!",
+          title: "नया उत्तर तैयार!",
           description: "यहाँ आपके प्रश्न पर एक नया perspective है।",
         });
       } catch (error) {
         console.error("Regeneration error:", error);
         toast({
-          title: "Error",
+          title: "Error", 
           description: "Answer regenerate करने में failed। कृपया दोबारा try करें।",
           variant: "destructive",
         });
       } finally {
         setIsLoading(false);
       }
-    } else if (!hasApiKey) {
-      toast({
-        title: "API Key आवश्यक है",
-        description: "Answer regenerate करने के लिए पहले अपनी API key set करें।",
-        variant: "destructive",
-      });
     }
   };
 
@@ -171,10 +142,13 @@ const Index = () => {
         onSubjectSelect={setSelectedSubject} 
       />
       
-      <ApiKeyInput 
-        onApiKeySet={handleApiKeySet}
-        hasApiKey={hasApiKey}
-      />
+      {/* Welcome message for no API key needed */}
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="flex items-center justify-center space-x-2 text-sm text-green-600 bg-green-50 rounded-lg p-3">
+          <span className="text-lg">🤖</span>
+          <span>Offline AI Ready - कोई API key की जरूरत नहीं! किसी भी विषय पर प्रश्न पूछें।</span>
+        </div>
+      </div>
       
       <SearchArea 
         selectedSubject={selectedSubject}
