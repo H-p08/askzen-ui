@@ -217,17 +217,17 @@ const EnhancedSubjectTabs = ({ selectedSubject, onSubjectSelect }: EnhancedSubje
 
   return (
     <>
-      <div className="w-full bg-gradient-to-r from-background via-muted/30 to-background backdrop-blur-sm border-b border-border/30 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="text-center mb-3">
+      <div className="w-full bg-gradient-to-r from-background via-muted/30 to-background backdrop-blur-sm border-b border-border/30 sticky top-0 z-40 min-h-fit">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="text-center mb-4">
             <h2 className="text-lg font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
               🚀 Enhanced Mini Gemini • Advanced AI Assistant
             </h2>
-            <p className="text-sm text-muted-foreground">Choose your specialized AI assistant with advanced capabilities</p>
+            <p className="text-sm text-muted-foreground mt-1">Choose your specialized AI assistant with advanced capabilities</p>
           </div>
           
-          <ScrollArea className="w-full">
-            <div className="flex space-x-3 pb-2">
+          <ScrollArea className="w-full max-h-none">
+            <div className="flex space-x-3 pb-4 min-h-[120px]">
               {subjects.map((subject) => {
                 const Icon = subject.icon;
                 const isSelected = selectedSubject === subject.id || selectedSubject.startsWith(`${subject.id}_`);
@@ -236,7 +236,7 @@ const EnhancedSubjectTabs = ({ selectedSubject, onSubjectSelect }: EnhancedSubje
                   <Button
                     key={subject.id}
                     variant={isSelected ? "default" : "ghost"}
-                    className={`flex-shrink-0 flex flex-col items-center space-y-1 px-4 py-3 rounded-xl transition-all duration-300 min-w-fit transform hover:scale-105 relative ${
+                    className={`flex-shrink-0 flex flex-col items-center space-y-2 px-4 py-4 rounded-xl transition-all duration-300 min-w-[140px] min-h-[100px] transform hover:scale-105 relative ${
                       isSelected 
                         ? "bg-gradient-to-r from-primary to-secondary text-primary-foreground shadow-lg scale-105" 
                         : `${subject.colorClass} border border-border/50 hover:shadow-md`
@@ -244,27 +244,27 @@ const EnhancedSubjectTabs = ({ selectedSubject, onSubjectSelect }: EnhancedSubje
                     onClick={() => handleSubjectSelect(subject.id)}
                   >
                     {subject.isNew && (
-                      <Badge className="absolute -top-2 -right-1 bg-green-500 text-white text-xs px-1 py-0">
+                      <Badge className="absolute -top-2 -right-1 bg-green-500 text-white text-xs px-1 py-0 z-10">
                         NEW
                       </Badge>
                     )}
                     {subject.isPremium && (
-                      <Badge className="absolute -top-2 -right-1 bg-yellow-500 text-white text-xs px-1 py-0">
+                      <Badge className="absolute -top-2 -right-1 bg-yellow-500 text-white text-xs px-1 py-0 z-10">
                         PRO
                       </Badge>
                     )}
                     {subject.isAdvanced && !subject.isNew && !subject.isPremium && (
-                      <Badge className="absolute -top-2 -right-1 bg-purple-500 text-white text-xs px-1 py-0">
+                      <Badge className="absolute -top-2 -right-1 bg-purple-500 text-white text-xs px-1 py-0 z-10">
                         <Sparkles className="h-2 w-2" />
                       </Badge>
                     )}
                     
-                    <div className="flex items-center space-x-2">
-                      <span className="text-base">{subject.emoji}</span>
-                      <Icon className="h-4 w-4" />
+                    <div className="flex items-center space-x-2 mb-1">
+                      <span className="text-lg">{subject.emoji}</span>
+                      <Icon className="h-5 w-5" />
                     </div>
-                    <div className="text-center">
-                      <div className="font-medium text-sm whitespace-nowrap">{subject.name}</div>
+                    <div className="text-center flex-1 flex flex-col justify-center">
+                      <div className="font-medium text-sm whitespace-nowrap mb-1">{subject.name}</div>
                       <div className="text-xs opacity-75 max-w-[120px] leading-tight">{subject.description}</div>
                     </div>
                   </Button>
