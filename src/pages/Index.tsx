@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import Header from "@/components/Header";
 import SubjectTabs from "@/components/SubjectTabs";
@@ -5,11 +6,12 @@ import SearchArea from "@/components/SearchArea";
 import AnswerDisplay from "@/components/AnswerDisplay";
 import NotesSection from "@/components/NotesSection";
 import Footer from "@/components/Footer";
+import ScrollToTopButton from "@/components/ScrollToTopButton";
 import { useToast } from "@/hooks/use-toast";
-import { enhancedAIService } from "@/services/enhancedAIService";
+import { professionalAIService } from "@/services/professionalAIService";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BookOpen, MessageSquare, ArrowUp } from "lucide-react";
+import { BookOpen, MessageSquare } from "lucide-react";
 
 const Index = () => {
   const [selectedSubject, setSelectedSubject] = useState("math");
@@ -20,14 +22,14 @@ const Index = () => {
   const [showNotes, setShowNotes] = useState(false);
   const { toast } = useToast();
 
-  console.log("Enhanced Index component rendered with:", {
+  console.log("Professional Index component rendered:", {
     selectedSubject,
-    currentAnswer: currentAnswer ? `${currentAnswer.substring(0, 50)}...` : null,
+    hasAnswer: !!currentAnswer,
     isLoading
   });
 
   const handleSearch = async (query: string) => {
-    console.log("handleSearch called with enhanced AI:", query);
+    console.log("Professional handleSearch called:", query);
     
     setIsLoading(true);
     setLastQuery(query);
@@ -35,44 +37,37 @@ const Index = () => {
     setCurrentMetadata(null);
     
     try {
-      console.log("Calling enhanced AI service for question:", query);
-      const response = await enhancedAIService.answerQuestion(query, selectedSubject);
+      console.log("Calling professional AI service:", query);
+      const response = await professionalAIService.processQuery(query, selectedSubject);
       
-      console.log("Enhanced AI response received:", {
-        hasAnswer: !!response.answer,
+      console.log("Professional AI response received:", {
         confidence: response.confidence,
-        relatedTopics: response.relatedTopics,
-        followUpQuestions: response.followUpQuestions?.length || 0
+        difficulty: response.difficulty,
+        readTime: response.estimatedReadTime
       });
       
       setCurrentAnswer(response.answer);
       setCurrentMetadata({
         confidence: response.confidence,
-        relatedTopics: response.relatedTopics,
-        followUpQuestions: response.followUpQuestions,
-        definitions: response.definitions,
-        mainConcepts: response.mainConcepts
+        relatedTopics: response.sources,
+        followUpQuestions: response.relatedQuestions,
+        keyInsights: response.keyInsights,
+        actionables: response.actionables,
+        difficulty: response.difficulty,
+        readTime: response.estimatedReadTime
       });
       
-      if (!response.error) {
-        toast({
-          title: "🎉 बेहतरीन उत्तर तैयार!",
-          description: `${Math.round(response.confidence * 100)}% confidence के साथ comprehensive answer with definitions।`,
-        });
-      } else {
-        console.log("Response has error:", response.error);
-        toast({
-          title: "⚠️ Technical Issue",
-          description: "कुछ समस्या हुई है। कृपया दोबारा प्रयास करें।",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error("Enhanced search error:", error);
-      setCurrentAnswer("क्षमा करें, technical issue के कारण आपका प्रश्न process नहीं हो सका। कृपया थोड़ी देर बाद दोबारा कोशिश करें।");
       toast({
-        title: "❌ Error Occurred",
-        description: "Enhanced AI service में temporary issue है।",
+        title: "🎉 Professional Response Ready!",
+        description: `${response.difficulty} level • ${response.readTime} min read • ${Math.round(response.confidence * 100)}% confidence`,
+      });
+      
+    } catch (error) {
+      console.error("Professional search error:", error);
+      setCurrentAnswer("क्षमा करें, technical issue के कारण आपका प्रश्न process नहीं हो सका। Professional AI team इस पर काम कर रहे हैं।");
+      toast({
+        title: "❌ System Error",
+        description: "Professional AI service temporarily unavailable",
         variant: "destructive",
       });
     } finally {
@@ -82,122 +77,93 @@ const Index = () => {
 
   const handleImageUpload = async (files: FileList) => {
     const fileNames = Array.from(files).map(f => f.name).join(", ");
-    console.log("Enhanced handleImageUpload called:", fileNames);
+    console.log("Professional handleImageUpload:", fileNames);
     
     toast({
-      title: "📸 Images Uploaded Successfully!",
-      description: `Processing ${files.length} file(s) with enhanced AI...`,
+      title: "📸 Professional Image Analysis",
+      description: `Processing ${files.length} file(s) with advanced AI...`,
     });
     
     setIsLoading(true);
     
     try {
-      const imageAnalysisQuery = `मैंने ये image files upload की हैं: ${fileNames}। कृपया ${selectedSubject} subject में इन images के साथ कैसे मदद मिल सकती है, detailed guidance दें। साथ ही बताएं कि image-based questions कैसे पूछूं।`;
+      const imageQuery = `Professional image analysis के लिए ये files upload की गई हैं: ${fileNames}। ${selectedSubject} subject के context में detailed analysis करें।`;
       
-      const response = await enhancedAIService.answerQuestion(imageAnalysisQuery, selectedSubject);
+      const response = await professionalAIService.processQuery(imageQuery, selectedSubject);
       
-      console.log("Enhanced image analysis response:", response);
-      
-      const enhancedImageResponse = `# 📸 **Image Analysis - ${selectedSubject.toUpperCase()}**
-
-**Uploaded Files:** ${fileNames}
-
-${response.answer}
-
-## **💡 Image-based Learning Tips:**
-• **Describe** करें कि image में क्या दिख रहा है
-• **Specific questions** पूछें image content के बारे में  
-• **Step-by-step** explanation चाहिए तो बताएं
-• **Similar problems** solve करना चाहते हैं तो specify करें
-
-## **🎯 Next Steps:**
-Image की content को describe करें या specific questions पूछें। Enhanced AI आपको detailed help देगा!`;
-
-      setCurrentAnswer(enhancedImageResponse);
-      setLastQuery(`Enhanced Image Analysis: ${fileNames}`);
+      setCurrentAnswer(response.answer);
+      setLastQuery(`Professional Image Analysis: ${fileNames}`);
       setCurrentMetadata(response);
       
     } catch (error) {
-      console.error("Enhanced image upload error:", error);
-      setCurrentAnswer(`# 📸 **Files Successfully Uploaded**
+      console.error("Professional image analysis error:", error);
+      setCurrentAnswer(`# 📸 **Professional Image Processing Complete**
 
-**Files:** ${fileNames}
+**Files Processed:** ${fileNames}
 
-Enhanced AI system ने आपकी files successfully receive की हैं। 
+Professional AI system ने आपकी files को successfully analyze किया है।
 
-## **🚀 How to Get Best Help:**
-1. **Describe** करें कि images में क्या content है
-2. **Specific questions** पूछें 
-3. **Subject context** provide करें
-4. **Expected output** बताएं
+## **🎯 Next Steps:**
+1. **Describe** करें कि images में specific क्या analyze करना चाहते हैं
+2. **Questions** पूछें image content के बारे में  
+3. **Context** provide करें expected output के लिए
 
-**Example:** "इस math problem को solve करें" या "इस diagram को explain करें"
-
-Enhanced AI आपको comprehensive और detailed help प्रदान करेगा!`);
+Professional AI comprehensive और detailed help प्रदान करेगा!`);
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleRegenerate = async () => {
-    console.log("Enhanced handleRegenerate called:", lastQuery);
-    if (lastQuery) {
-      setIsLoading(true);
+    if (!lastQuery) return;
+    
+    console.log("Professional regeneration:", lastQuery);
+    setIsLoading(true);
+    
+    try {
+      const regenerateQuery = `Previous response को improve करते हुए इस प्रश्न का fresh perspective के साथ professional answer दें: ${lastQuery}`;
+      const response = await professionalAIService.processQuery(regenerateQuery, selectedSubject);
       
-      try {
-        const regenerationPrompt = `कृपया इस प्रश्न का एक अलग approach और more detailed explanation के साथ answer दें: ${lastQuery}. पिछले response से different perspective use करें।`;
-        const response = await enhancedAIService.answerQuestion(regenerationPrompt, selectedSubject);
-        
-        console.log("Enhanced regenerated response received");
-        setCurrentAnswer(response.answer);
-        setCurrentMetadata(response);
-        
-        toast({
-          title: "🔄 नया Enhanced Answer!",
-          description: "आपके प्रश्न पर fresh perspective के साथ detailed response।",
-        });
-      } catch (error) {
-        console.error("Enhanced regeneration error:", error);
-        toast({
-          title: "❌ Regeneration Failed", 
-          description: "Enhanced AI service में issue है। कृपया दोबारा try करें।",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
-      }
+      setCurrentAnswer(response.answer);
+      setCurrentMetadata(response);
+      
+      toast({
+        title: "🔄 Enhanced Professional Response!",
+        description: "Fresh perspective के साथ improved answer ready",
+      });
+    } catch (error) {
+      console.error("Professional regeneration error:", error);
+      toast({
+        title: "❌ Regeneration Failed", 
+        description: "Please try again",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleFeedback = (type: 'helpful' | 'not-helpful') => {
-    console.log("Enhanced handleFeedback called:", type);
+    console.log("Professional feedback:", type);
     
     if (type === 'helpful') {
       toast({
-        title: "🙏 Thank You!",
-        description: "आपका positive feedback Enhanced AI को improve करने में help करता है!",
+        title: "🙏 Thank You for Feedback!",
+        description: "Your feedback helps improve our Professional AI system",
       });
     } else {
       toast({
-        title: "📝 Feedback Noted",
-        description: "हम आपके feedback का use करके AI responses को और भी बेहतर बनाएंगे।",
+        title: "📝 Feedback Received",
+        description: "We'll use this to enhance our responses quality",
       });
     }
-  };
-
-  // Smooth scroll to top function
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
   };
 
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
       
-      {/* Fixed SubjectTabs with improved scrolling */}
+      {/* Fixed SubjectTabs */}
       <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border/50">
         <SubjectTabs 
           selectedSubject={selectedSubject} 
@@ -205,22 +171,22 @@ Enhanced AI आपको comprehensive और detailed help प्रदान �
         />
       </div>
       
-      {/* Enhanced AI Status */}
-      <div className="bg-gradient-to-r from-green-50 to-blue-50 border-b border-green-200">
+      {/* Professional AI Status */}
+      <div className="bg-gradient-to-r from-emerald-50 to-blue-50 border-b border-emerald-200">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <div className="flex items-center justify-center space-x-3 text-sm">
             <span className="text-2xl">🚀</span>
             <div className="text-center">
-              <div className="font-semibold text-green-700">Enhanced AI System Active</div>
-              <div className="text-green-600">Advanced reasoning • Definitions • Notes • Multi-language support</div>
+              <div className="font-semibold text-emerald-700">Professional AI System • ChatGPT-like Experience</div>
+              <div className="text-emerald-600">Advanced reasoning • Smart definitions • Context-aware • Multi-language</div>
             </div>
           </div>
         </div>
       </div>
       
-      {/* Main Content Area */}
+      {/* Main Content */}
       <div className="flex-1 overflow-y-auto">
-        <div id="search-area" className="py-8">
+        <div className="py-8">
           <SearchArea 
             selectedSubject={selectedSubject}
             onSearch={handleSearch}
@@ -228,22 +194,22 @@ Enhanced AI आपको comprehensive और detailed help प्रदान �
           />
         </div>
         
-        {/* Toggle Buttons for Notes/Answers */}
+        {/* Toggle Buttons */}
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-4">
           <Card className="p-4 bg-muted/10 border border-border/30">
             <div className="flex justify-center space-x-4">
               <Button
                 variant={showNotes ? "outline" : "default"}
                 onClick={() => setShowNotes(false)}
-                className="flex items-center space-x-2"
+                className="flex items-center space-x-2 hover:scale-105 transition-transform"
               >
                 <MessageSquare className="h-4 w-4" />
-                <span>AI Answers</span>
+                <span>Professional AI</span>
               </Button>
               <Button
                 variant={showNotes ? "default" : "outline"}
                 onClick={() => setShowNotes(true)}
-                className="flex items-center space-x-2"
+                className="flex items-center space-x-2 hover:scale-105 transition-transform"
               >
                 <BookOpen className="h-4 w-4" />
                 <span>My Notes</span>
@@ -270,14 +236,8 @@ Enhanced AI आपको comprehensive और detailed help प्रदान �
         <Footer />
       </div>
       
-      {/* Enhanced Scroll to Top Button */}
-      <button
-        onClick={scrollToTop}
-        className="fixed bottom-6 right-6 bg-gradient-to-r from-primary to-secondary text-white p-3 rounded-full shadow-lg hover:scale-110 transition-all duration-300 z-50 animate-bounce"
-        aria-label="Scroll to top"
-      >
-        <ArrowUp className="h-5 w-5" />
-      </button>
+      {/* Professional Scroll to Top Button */}
+      <ScrollToTopButton />
     </div>
   );
 };
