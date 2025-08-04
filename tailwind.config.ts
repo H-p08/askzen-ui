@@ -18,6 +18,9 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				'inter': ['Inter', 'system-ui', 'sans-serif'],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -26,7 +29,8 @@ export default {
 				foreground: 'hsl(var(--foreground))',
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
-					foreground: 'hsl(var(--primary-foreground))'
+					foreground: 'hsl(var(--primary-foreground))',
+					muted: 'hsl(var(--primary-muted))'
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
@@ -51,6 +55,15 @@ export default {
 				card: {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
+				},
+				subjects: {
+					math: 'hsl(var(--math))',
+					science: 'hsl(var(--science))',
+					english: 'hsl(var(--english))',
+					reasoning: 'hsl(var(--reasoning))',
+					geography: 'hsl(var(--geography))',
+					knowledge: 'hsl(var(--knowledge))',
+					diagrams: 'hsl(var(--diagrams))'
 				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
