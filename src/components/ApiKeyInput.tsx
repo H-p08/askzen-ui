@@ -20,8 +20,8 @@ const ApiKeyInput = ({ onApiKeySet, hasApiKey }: ApiKeyInputProps) => {
   const handleSetApiKey = () => {
     if (!apiKey.trim()) {
       toast({
-        title: "API Key Required",
-        description: "Please enter your Perplexity API key.",
+        title: "API Key आवश्यक है",
+        description: "कृपया अपनी Perplexity API key डालें।",
         variant: "destructive",
       });
       return;
@@ -32,10 +32,6 @@ const ApiKeyInput = ({ onApiKeySet, hasApiKey }: ApiKeyInputProps) => {
     
     setTimeout(() => {
       setIsSettingKey(false);
-      toast({
-        title: "API Key Set!",
-        description: "You can now ask any question and get AI-powered answers.",
-      });
     }, 1000);
   };
 
@@ -44,7 +40,7 @@ const ApiKeyInput = ({ onApiKeySet, hasApiKey }: ApiKeyInputProps) => {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex items-center justify-center space-x-2 text-sm text-green-600 bg-green-50 rounded-lg p-3">
           <Key className="h-4 w-4" />
-          <span>API Key configured - Ready for AI-powered answers!</span>
+          <span>API Key configured - AI-powered उत्तर के लिए तैयार!</span>
         </div>
       </div>
     );
@@ -57,21 +53,24 @@ const ApiKeyInput = ({ onApiKeySet, hasApiKey }: ApiKeyInputProps) => {
           <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
             <Key className="h-8 w-8 text-primary" />
           </div>
-          <h3 className="text-lg font-semibold mb-2">Connect Your AI</h3>
+          <h3 className="text-lg font-semibold mb-2">अपना AI Connect करें</h3>
           <p className="text-muted-foreground mb-4">
-            Enter your Perplexity API key to unlock real AI-powered answers for any question
+            किसी भी प्रश्न का real AI-powered उत्तर पाने के लिए अपनी Perplexity API key डालें
           </p>
           <p className="text-sm text-muted-foreground mb-4">
-            Get your free API key at{" "}
+            अपनी free API key यहाँ से प्राप्त करें:{" "}
             <a 
               href="https://www.perplexity.ai/settings/api" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="text-primary hover:underline"
+              className="text-primary hover:underline font-medium"
             >
               perplexity.ai/settings/api
             </a>
           </p>
+          <div className="text-xs text-muted-foreground bg-blue-50 p-2 rounded mb-4">
+            <strong>महत्वपूर्ण:</strong> API key डालने के बाद आप math, science, English, reasoning, geography और किसी भी विषय के प्रश्नों का detailed उत्तर प्राप्त कर सकेंगे!
+          </div>
         </div>
 
         <div className="space-y-4">
@@ -104,7 +103,7 @@ const ApiKeyInput = ({ onApiKeySet, hasApiKey }: ApiKeyInputProps) => {
             disabled={!apiKey.trim() || isSettingKey}
             className="w-full"
           >
-            {isSettingKey ? "Setting up..." : "Connect AI"}
+            {isSettingKey ? "Setup हो रहा है..." : "AI Connect करें"}
           </Button>
         </div>
       </Card>

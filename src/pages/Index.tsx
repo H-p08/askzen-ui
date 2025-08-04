@@ -19,45 +19,69 @@ const Index = () => {
 
   console.log("Index component rendered with:", {
     selectedSubject,
-    currentAnswer,
+    currentAnswer: currentAnswer ? `${currentAnswer.substring(0, 50)}...` : null,
     isLoading,
     hasApiKey
   });
 
   const handleApiKeySet = (apiKey: string) => {
+    console.log("Setting API key...");
     aiService.setApiKey(apiKey);
     setHasApiKey(true);
+    toast({
+      title: "API Key सेट हो गया!",
+      description: "अब आप किसी भी प्रश्न का AI-powered उत्तर प्राप्त कर सकते हैं।",
+    });
   };
 
   const handleSearch = async (query: string) => {
     console.log("handleSearch called with query:", query);
+    console.log("Has API key:", hasApiKey);
+    
+    if (!hasApiKey) {
+      toast({
+        title: "API Key आवश्यक है",
+        description: "कृपया पहले अपनी Perplexity API key डालें।",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
     setLastQuery(query);
+    setCurrentAnswer(null); // Clear previous answer
     
     try {
+      console.log("Calling AI service for question:", query);
       const response = await aiService.answerQuestion(query, selectedSubject);
       
-      console.log("AI response received:", response);
+      console.log("AI response received:", {
+        hasAnswer: !!response.answer,
+        hasError: !!response.error,
+        answerLength: response.answer?.length || 0
+      });
+      
       setCurrentAnswer(response.answer);
       
       if (!response.error) {
         toast({
-          title: "Answer generated!",
-          description: "Your AI-powered answer is ready.",
+          title: "उत्तर तैयार!",
+          description: "आपका AI-powered उत्तर तैयार है।",
         });
       } else {
+        console.log("Response has error:", response.error);
         toast({
-          title: "API Key needed",
-          description: "Please enter your Perplexity API key to get real AI answers.",
+          title: "API Key की जांच करें",
+          description: "कृपया अपनी Perplexity API key की जांच करें और दोबारा कोशिश करें।",
           variant: "destructive",
         });
       }
     } catch (error) {
       console.error("Search error:", error);
-      setCurrentAnswer("I apologize, but I encountered an error while processing your question. Please try again.");
+      setCurrentAnswer("क्षमा करें, आपके प्रश्न को process करते समय error आया। कृपया दोबारा कोशिश करें।");
       toast({
         title: "Error",
-        description: "Failed to get AI response. Please check your API key and try again.",
+        description: "AI response पाने में failed। कृपया अपनी API key check करें और दोबारा try करें।",
         variant: "destructive",
       });
     } finally {
@@ -95,26 +119,26 @@ const Index = () => {
   };
 
   const handleRegenerate = async () => {
-    console.log("handleRegenerate called");
+    console.log("handleRegenerate called with lastQuery:", lastQuery);
     if (lastQuery && hasApiKey) {
       setIsLoading(true);
       
       try {
-        const regenerationPrompt = `Please provide an alternative explanation or different approach to this question: ${lastQuery}`;
+        const regenerationPrompt = `कृपया इस प्रश्न का एक alternative explanation या different approach प्रदान करें: ${lastQuery}`;
         const response = await aiService.answerQuestion(regenerationPrompt, selectedSubject);
         
-        console.log("Regenerated response:", response);
+        console.log("Regenerated response received");
         setCurrentAnswer(response.answer);
         
         toast({
-          title: "Answer regenerated!",
-          description: "Here's a fresh perspective on your question.",
+          title: "उत्तर दोबारा generate हुआ!",
+          description: "यहाँ आपके प्रश्न पर एक नया perspective है।",
         });
       } catch (error) {
         console.error("Regeneration error:", error);
         toast({
           title: "Error",
-          description: "Failed to regenerate answer. Please try again.",
+          description: "Answer regenerate करने में failed। कृपया दोबारा try करें।",
           variant: "destructive",
         });
       } finally {
@@ -122,8 +146,8 @@ const Index = () => {
       }
     } else if (!hasApiKey) {
       toast({
-        title: "API Key needed",
-        description: "Please set your API key first to regenerate answers.",
+        title: "API Key आवश्यक है",
+        description: "Answer regenerate करने के लिए पहले अपनी API key set करें।",
         variant: "destructive",
       });
     }
@@ -132,10 +156,10 @@ const Index = () => {
   const handleFeedback = (type: 'helpful' | 'not-helpful') => {
     console.log("handleFeedback called with type:", type);
     toast({
-      title: type === 'helpful' ? "Thank you!" : "Feedback received",
+      title: type === 'helpful' ? "धन्यवाद!" : "Feedback मिला",
       description: type === 'helpful' 
-        ? "We're glad the answer was helpful!" 
-        : "We'll use your feedback to improve our responses.",
+        ? "हमें खुशी है कि उत्तर helpful था!" 
+        : "हम आपके feedback का use करके responses improve करेंगे।",
     });
   };
 
