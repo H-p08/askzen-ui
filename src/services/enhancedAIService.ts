@@ -1,4 +1,5 @@
 import { enhancedScienceService } from './enhancedScienceService';
+import { definitionService } from './definitionService';
 
 interface AIResponse {
   answer: string;
@@ -6,6 +7,8 @@ interface AIResponse {
   confidence: number;
   relatedTopics: string[];
   followUpQuestions: string[];
+  definitions?: any[];
+  mainConcepts?: string[];
 }
 
 interface KnowledgeBase {
@@ -293,6 +296,9 @@ export class EnhancedAIService {
         answer = this.generateEnhancedAnswer(question, subject, analysis);
       }
       
+      // Extract definitions
+      const definitionResponse = definitionService.extractDefinitions(question, subject);
+      
       const relatedTopics = this.findRelatedTopics(question, subject);
       const followUpQuestions = this.generateFollowUpQuestions(question, subject);
       
@@ -304,10 +310,12 @@ export class EnhancedAIService {
       });
       
       return {
-        answer: this.formatEnhancedAnswer(answer, subject, question, analysis),
+        answer: this.formatEnhancedAnswer(answer, subject, question, analysis, definitionResponse),
         confidence: analysis.confidence,
         relatedTopics,
-        followUpQuestions
+        followUpQuestions,
+        definitions: definitionResponse.definitions,
+        mainConcepts: definitionResponse.mainConcepts
       };
     } catch (error) {
       console.error('Enhanced AI Error:', error);
@@ -664,11 +672,42 @@ Regular practice से logical thinking improve होती है।
     return questions;
   }
 
-  private formatEnhancedAnswer(answer: string, subject: string, question: string, analysis: any): string {
+  private formatEnhancedAnswer(
+    answer: string, 
+    subject: string, 
+    question: string, 
+    analysis: any, 
+    definitionResponse: any
+  ): string {
     const timestamp = new Date().toLocaleString('hi-IN');
     const confidenceText = analysis.confidence > 0.8 ? 'उच्च' : analysis.confidence > 0.6 ? 'मध्यम' : 'निम्न';
     
-    let formattedAnswer = `${answer}\n\n---\n\n`;
+    let formattedAnswer = `${answer}\n\n`;
+    
+    // Add definitions section if available
+    if (definitionResponse.definitions && definitionResponse.definitions.length > 0) {
+      formattedAnswer += `---\n\n# 📚 **Key Definitions & Concepts**\n\n`;
+      
+      definitionResponse.definitions.forEach((def: any, index: number) => {
+        formattedAnswer += `### **${index + 1}. ${def.term}**\n`;
+        formattedAnswer += `**Definition:** ${def.meaning}\n\n`;
+        formattedAnswer += `**Context:** ${def.context}\n\n`;
+        
+        if (def.examples && def.examples.length > 0) {
+          formattedAnswer += `**Examples:**\n`;
+          def.examples.forEach((example: string) => {
+            formattedAnswer += `• ${example}\n`;
+          });
+          formattedAnswer += '\n';
+        }
+        
+        if (def.relatedTerms && def.relatedTerms.length > 0) {
+          formattedAnswer += `**Related Terms:** ${def.relatedTerms.join(', ')}\n\n`;
+        }
+      });
+    }
+    
+    formattedAnswer += `---\n\n`;
     
     // Add confidence and metadata
     formattedAnswer += `**📊 Response Quality:**\n`;
@@ -694,7 +733,7 @@ Regular practice से logical thinking improve होती है।
     // Add encouragement and next steps
     formattedAnswer += `\n\n**🌟 Keep Learning:** आपकी curiosity बहुत अच्छी है! Continue asking questions और exploring करते रहें।`;
     
-    formattedAnswer += `\n\n*Enhanced AI द्वारा comprehensive response। Quality और accuracy के लिए continuously improving।*`;
+    formattedAnswer += `\n\n*Enhanced AI द्वारा comprehensive response with definitions। Quality और accuracy के लिए continuously improving।*`;
     formattedAnswer += `\n📅 ${timestamp}`;
     
     return formattedAnswer;

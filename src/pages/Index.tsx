@@ -1,12 +1,15 @@
-
 import { useState } from "react";
 import Header from "@/components/Header";
 import SubjectTabs from "@/components/SubjectTabs";
 import SearchArea from "@/components/SearchArea";
 import AnswerDisplay from "@/components/AnswerDisplay";
+import NotesSection from "@/components/NotesSection";
 import Footer from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
 import { enhancedAIService } from "@/services/enhancedAIService";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { BookOpen, MessageSquare, ArrowUp } from "lucide-react";
 
 const Index = () => {
   const [selectedSubject, setSelectedSubject] = useState("math");
@@ -14,6 +17,7 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [lastQuery, setLastQuery] = useState<string>("");
   const [currentMetadata, setCurrentMetadata] = useState<any>(null);
+  const [showNotes, setShowNotes] = useState(false);
   const { toast } = useToast();
 
   console.log("Enhanced Index component rendered with:", {
@@ -45,13 +49,15 @@ const Index = () => {
       setCurrentMetadata({
         confidence: response.confidence,
         relatedTopics: response.relatedTopics,
-        followUpQuestions: response.followUpQuestions
+        followUpQuestions: response.followUpQuestions,
+        definitions: response.definitions,
+        mainConcepts: response.mainConcepts
       });
       
       if (!response.error) {
         toast({
           title: "🎉 बेहतरीन उत्तर तैयार!",
-          description: `${Math.round(response.confidence * 100)}% confidence के साथ comprehensive answer।`,
+          description: `${Math.round(response.confidence * 100)}% confidence के साथ comprehensive answer with definitions।`,
         });
       } else {
         console.log("Response has error:", response.error);
@@ -188,50 +194,90 @@ Enhanced AI आपको comprehensive और detailed help प्रदान �
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen flex flex-col">
       <Header />
-      <SubjectTabs 
-        selectedSubject={selectedSubject} 
-        onSubjectSelect={setSelectedSubject} 
-      />
+      
+      {/* Fixed SubjectTabs with improved scrolling */}
+      <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border/50">
+        <SubjectTabs 
+          selectedSubject={selectedSubject} 
+          onSubjectSelect={setSelectedSubject} 
+        />
+      </div>
       
       {/* Enhanced AI Status */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <div className="flex items-center justify-center space-x-3 text-sm bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg p-3 animate-fade-in">
-          <span className="text-2xl">🚀</span>
-          <div className="text-center">
-            <div className="font-semibold text-green-700">Enhanced AI System Active</div>
-            <div className="text-green-600">Advanced reasoning • Comprehensive answers • Multi-language support</div>
+      <div className="bg-gradient-to-r from-green-50 to-blue-50 border-b border-green-200">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+          <div className="flex items-center justify-center space-x-3 text-sm">
+            <span className="text-2xl">🚀</span>
+            <div className="text-center">
+              <div className="font-semibold text-green-700">Enhanced AI System Active</div>
+              <div className="text-green-600">Advanced reasoning • Definitions • Notes • Multi-language support</div>
+            </div>
           </div>
         </div>
       </div>
       
-      <div id="search-area">
-        <SearchArea 
-          selectedSubject={selectedSubject}
-          onSearch={handleSearch}
-          onImageUpload={handleImageUpload}
-        />
+      {/* Main Content Area */}
+      <div className="flex-1 overflow-y-auto">
+        <div id="search-area" className="py-8">
+          <SearchArea 
+            selectedSubject={selectedSubject}
+            onSearch={handleSearch}
+            onImageUpload={handleImageUpload}
+          />
+        </div>
+        
+        {/* Toggle Buttons for Notes/Answers */}
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-4">
+          <Card className="p-4 bg-muted/10 border border-border/30">
+            <div className="flex justify-center space-x-4">
+              <Button
+                variant={showNotes ? "outline" : "default"}
+                onClick={() => setShowNotes(false)}
+                className="flex items-center space-x-2"
+              >
+                <MessageSquare className="h-4 w-4" />
+                <span>AI Answers</span>
+              </Button>
+              <Button
+                variant={showNotes ? "default" : "outline"}
+                onClick={() => setShowNotes(true)}
+                className="flex items-center space-x-2"
+              >
+                <BookOpen className="h-4 w-4" />
+                <span>My Notes</span>
+              </Button>
+            </div>
+          </Card>
+        </div>
+        
+        {/* Content Display */}
+        {showNotes ? (
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
+            <NotesSection selectedSubject={selectedSubject} />
+          </div>
+        ) : (
+          <AnswerDisplay 
+            answer={currentAnswer}
+            isLoading={isLoading}
+            onRegenerate={handleRegenerate}
+            onFeedback={handleFeedback}
+            metadata={currentMetadata}
+          />
+        )}
+        
+        <Footer />
       </div>
       
-      <AnswerDisplay 
-        answer={currentAnswer}
-        isLoading={isLoading}
-        onRegenerate={handleRegenerate}
-        onFeedback={handleFeedback}
-        metadata={currentMetadata}
-      />
-      
-      {/* Smooth Scroll to Top Button */}
+      {/* Enhanced Scroll to Top Button */}
       <button
         onClick={scrollToTop}
-        className="fixed bottom-6 right-6 bg-primary text-primary-foreground p-3 rounded-full shadow-lg hover:scale-110 transition-all duration-300 z-50 animate-bounce"
+        className="fixed bottom-6 right-6 bg-gradient-to-r from-primary to-secondary text-white p-3 rounded-full shadow-lg hover:scale-110 transition-all duration-300 z-50 animate-bounce"
         aria-label="Scroll to top"
       >
-        ⬆️
+        <ArrowUp className="h-5 w-5" />
       </button>
-      
-      <Footer />
     </div>
   );
 };
