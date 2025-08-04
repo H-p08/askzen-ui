@@ -2,7 +2,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Settings, Shield, User, Crown, Telegram } from "lucide-react";
+import { Settings, Shield, User, Crown, Send } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Header = () => {
@@ -36,7 +36,7 @@ const Header = () => {
               size="sm"
               className="border-blue-300 text-blue-700 hover:bg-blue-50"
             >
-              <Telegram className="h-4 w-4 mr-2" />
+              <Send className="h-4 w-4 mr-2" />
               Join Channel
             </Button>
             
