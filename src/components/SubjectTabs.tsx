@@ -12,13 +12,13 @@ interface Subject {
 }
 
 const subjects: Subject[] = [
-  { id: "math", name: "Math", icon: Calculator, emoji: "📐", colorClass: "bg-subjects-math/20 hover:bg-subjects-math/30 text-orange-700" },
-  { id: "science", name: "Science", icon: Microscope, emoji: "🔬", colorClass: "bg-subjects-science/20 hover:bg-subjects-science/30 text-green-700" },
-  { id: "english", name: "English", icon: BookOpen, emoji: "📖", colorClass: "bg-subjects-english/20 hover:bg-subjects-english/30 text-purple-700" },
-  { id: "reasoning", name: "Reasoning", icon: Brain, emoji: "🧮", colorClass: "bg-subjects-reasoning/20 hover:bg-subjects-reasoning/30 text-blue-700" },
-  { id: "geography", name: "Geography", icon: Globe, emoji: "🌍", colorClass: "bg-subjects-geography/20 hover:bg-subjects-geography/30 text-emerald-700" },
-  { id: "knowledge", name: "General Knowledge", icon: Lightbulb, emoji: "🧠", colorClass: "bg-subjects-knowledge/20 hover:bg-subjects-knowledge/30 text-violet-700" },
-  { id: "diagrams", name: "Diagrams", icon: Image, emoji: "🖼️", colorClass: "bg-subjects-diagrams/20 hover:bg-subjects-diagrams/30 text-amber-700" },
+  { id: "math", name: "Math", icon: Calculator, emoji: "📐", colorClass: "bg-orange-100 hover:bg-orange-200 text-orange-700" },
+  { id: "science", name: "Science", icon: Microscope, emoji: "🔬", colorClass: "bg-green-100 hover:bg-green-200 text-green-700" },
+  { id: "english", name: "English", icon: BookOpen, emoji: "📖", colorClass: "bg-purple-100 hover:bg-purple-200 text-purple-700" },
+  { id: "reasoning", name: "Reasoning", icon: Brain, emoji: "🧮", colorClass: "bg-blue-100 hover:bg-blue-200 text-blue-700" },
+  { id: "geography", name: "Geography", icon: Globe, emoji: "🌍", colorClass: "bg-emerald-100 hover:bg-emerald-200 text-emerald-700" },
+  { id: "knowledge", name: "General Knowledge", icon: Lightbulb, emoji: "🧠", colorClass: "bg-violet-100 hover:bg-violet-200 text-violet-700" },
+  { id: "diagrams", name: "Diagrams", icon: Image, emoji: "🖼️", colorClass: "bg-amber-100 hover:bg-amber-200 text-amber-700" },
 ];
 
 interface SubjectTabsProps {
