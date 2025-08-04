@@ -76,17 +76,17 @@ const SearchArea = ({ selectedSubject, onSearch, onImageUpload }: SearchAreaProp
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       {/* Search Bar */}
       <div className="relative">
-        <div className="flex items-center bg-card rounded-2xl shadow-lg border border-border/50 overflow-hidden">
+        <div className="flex items-center glass-card rounded-2xl shadow-lg overflow-hidden">
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder={`Type your ${subjectNames[selectedSubject] || ''} question here...`}
+            placeholder={`Ask me anything about ${subjectNames[selectedSubject] || 'any topic'}...`}
             className="flex-1 border-0 bg-transparent px-6 py-4 text-base focus-visible:ring-0 focus-visible:ring-offset-0"
           />
           <Button 
             onClick={handleSearch}
-            className="mr-2 rounded-xl px-6 py-2"
+            className="mr-2 rounded-xl px-6 py-2 bg-gradient-to-r from-primary to-secondary hover:opacity-90 transition-opacity"
             disabled={!searchQuery.trim()}
           >
             <Search className="h-4 w-4" />
@@ -94,26 +94,26 @@ const SearchArea = ({ selectedSubject, onSearch, onImageUpload }: SearchAreaProp
         </div>
       </div>
 
-      {/* Ad Banner Placeholder */}
-      <div className="w-full h-24 bg-muted/50 rounded-xl border-2 border-dashed border-border flex items-center justify-center">
-        <span className="text-muted-foreground font-medium">Your Ad Here (728x90)</span>
+      {/* Ad Banner Placeholder - now with glass effect */}
+      <div className="w-full h-24 glass-card rounded-xl border-2 border-dashed border-primary/20 flex items-center justify-center">
+        <span className="gradient-text font-medium">Your Ad Here (728x90)</span>
       </div>
 
       {/* Image Upload Area */}
-      <Card className="p-8 border-2 border-dashed border-border/50 bg-card/50 hover:bg-card/70 transition-colors">
+      <Card className="glass-card p-8 border-2 border-dashed border-primary/30 hover:border-primary/50 transition-all duration-300">
         <div
-          className={`text-center ${dragActive ? 'bg-primary/10 rounded-lg p-4' : ''}`}
+          className={`text-center transition-all duration-200 ${dragActive ? 'bg-primary/10 rounded-lg p-4 scale-105' : ''}`}
           onDragEnter={handleDrag}
           onDragLeave={handleDrag}
           onDragOver={handleDrag}
           onDrop={handleDrop}
         >
-          <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+          <div className="mx-auto w-16 h-16 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-full flex items-center justify-center mb-4">
             <Upload className="h-8 w-8 text-primary" />
           </div>
-          <h3 className="text-lg font-semibold mb-2">Upload Image of your Question</h3>
+          <h3 className="text-lg font-semibold mb-2 gradient-text">Upload Your Question Images</h3>
           <p className="text-muted-foreground mb-4">
-            Drag & drop your image here, or click to browse
+            Drag & drop your images here, or click to browse
           </p>
           <p className="text-sm text-muted-foreground mb-4">
             Supported formats: JPG, PNG, PDF (Max 10MB)
@@ -129,7 +129,7 @@ const SearchArea = ({ selectedSubject, onSearch, onImageUpload }: SearchAreaProp
           />
           <Button 
             variant="outline" 
-            className="rounded-xl"
+            className="rounded-xl border-primary/30 hover:bg-primary/10 hover:border-primary/50 transition-all"
             onClick={() => document.getElementById('file-upload')?.click()}
           >
             Browse Files
@@ -141,7 +141,7 @@ const SearchArea = ({ selectedSubject, onSearch, onImageUpload }: SearchAreaProp
           <div className="mt-6 space-y-2">
             <h4 className="font-medium text-sm text-muted-foreground">Uploaded Files:</h4>
             {uploadedFiles.map((file, index) => (
-              <div key={index} className="flex items-center justify-between bg-muted/50 rounded-lg p-3">
+              <div key={index} className="flex items-center justify-between bg-primary/5 rounded-lg p-3 border border-primary/20">
                 <span className="text-sm font-medium">{file.name}</span>
                 <Button
                   variant="ghost"

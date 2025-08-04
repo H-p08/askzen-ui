@@ -4,41 +4,68 @@ import Header from "@/components/Header";
 import SubjectTabs from "@/components/SubjectTabs";
 import SearchArea from "@/components/SearchArea";
 import AnswerDisplay from "@/components/AnswerDisplay";
+import ApiKeyInput from "@/components/ApiKeyInput";
 import Footer from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
+import { aiService } from "@/services/aiService";
 
 const Index = () => {
   const [selectedSubject, setSelectedSubject] = useState("math");
   const [currentAnswer, setCurrentAnswer] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [hasApiKey, setHasApiKey] = useState(false);
+  const [lastQuery, setLastQuery] = useState<string>("");
   const { toast } = useToast();
 
   console.log("Index component rendered with:", {
     selectedSubject,
     currentAnswer,
-    isLoading
+    isLoading,
+    hasApiKey
   });
+
+  const handleApiKeySet = (apiKey: string) => {
+    aiService.setApiKey(apiKey);
+    setHasApiKey(true);
+  };
 
   const handleSearch = async (query: string) => {
     console.log("handleSearch called with query:", query);
     setIsLoading(true);
+    setLastQuery(query);
     
-    // Simulate AI processing
-    setTimeout(() => {
-      const sampleAnswer = `Based on your ${selectedSubject} question: "${query}"\n\nHere's a comprehensive answer:\n\n1. First, let's break down the problem step by step.\n\n2. We need to identify the key concepts involved.\n\n3. Then we'll apply the appropriate formulas or methods.\n\n4. Finally, we'll solve and verify our answer.\n\nThis is a simulated response. In a real implementation, this would be powered by an AI model that provides detailed, accurate answers tailored to the specific subject and question asked.`;
+    try {
+      const response = await aiService.answerQuestion(query, selectedSubject);
       
-      console.log("Setting answer:", sampleAnswer);
-      setCurrentAnswer(sampleAnswer);
-      setIsLoading(false);
+      console.log("AI response received:", response);
+      setCurrentAnswer(response.answer);
       
+      if (!response.error) {
+        toast({
+          title: "Answer generated!",
+          description: "Your AI-powered answer is ready.",
+        });
+      } else {
+        toast({
+          title: "API Key needed",
+          description: "Please enter your Perplexity API key to get real AI answers.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Search error:", error);
+      setCurrentAnswer("I apologize, but I encountered an error while processing your question. Please try again.");
       toast({
-        title: "Answer generated!",
-        description: "Your AI-powered answer is ready.",
+        title: "Error",
+        description: "Failed to get AI response. Please check your API key and try again.",
+        variant: "destructive",
       });
-    }, 2000);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleImageUpload = (files: FileList) => {
+  const handleImageUpload = async (files: FileList) => {
     const fileNames = Array.from(files).map(f => f.name).join(", ");
     console.log("handleImageUpload called with files:", fileNames);
     
@@ -47,27 +74,58 @@ const Index = () => {
       description: `Processing: ${fileNames}`,
     });
     
-    // Simulate processing uploaded images
     setIsLoading(true);
-    setTimeout(() => {
-      const sampleAnswer = `I've analyzed your uploaded image(s): ${fileNames}\n\nBased on the visual content, here's what I can help you with:\n\n• I can see mathematical equations, diagrams, or text that needs solving\n• Let me break down the problem shown in the image\n• Here's the step-by-step solution...\n\nThis is a simulated response for image analysis. In a real implementation, this would use computer vision and AI to accurately read and solve problems from uploaded images.`;
+    
+    try {
+      // For now, we'll analyze the image names and ask the AI about them
+      const imageAnalysisQuery = `I have uploaded the following image files: ${fileNames}. Based on the file names, can you help me understand what kind of academic content these might contain and how I can get help with them?`;
       
-      console.log("Setting answer from image upload:", sampleAnswer);
-      setCurrentAnswer(sampleAnswer);
+      const response = await aiService.answerQuestion(imageAnalysisQuery, selectedSubject);
+      
+      console.log("Image analysis response:", response);
+      setCurrentAnswer(`I've received your uploaded files: ${fileNames}\n\n${response.answer}\n\nNote: Full image analysis requires additional setup. For now, I can help you with questions about the content if you describe what's in the images.`);
+      setLastQuery(`Image analysis: ${fileNames}`);
+      
+    } catch (error) {
+      console.error("Image upload error:", error);
+      setCurrentAnswer(`I've received your uploaded files: ${fileNames}\n\nI can help you with questions about the content. Please describe what's in the images or ask specific questions about the subject matter.`);
+    } finally {
       setIsLoading(false);
-    }, 3000);
+    }
   };
 
-  const handleRegenerate = () => {
-    console.log("handleRegenerate called with currentAnswer:", currentAnswer);
-    if (currentAnswer) {
+  const handleRegenerate = async () => {
+    console.log("handleRegenerate called");
+    if (lastQuery && hasApiKey) {
       setIsLoading(true);
-      setTimeout(() => {
-        const newAnswer = currentAnswer + "\n\n[Regenerated] Here's an alternative explanation or approach to the same problem...";
-        console.log("Setting regenerated answer:", newAnswer);
-        setCurrentAnswer(newAnswer);
+      
+      try {
+        const regenerationPrompt = `Please provide an alternative explanation or different approach to this question: ${lastQuery}`;
+        const response = await aiService.answerQuestion(regenerationPrompt, selectedSubject);
+        
+        console.log("Regenerated response:", response);
+        setCurrentAnswer(response.answer);
+        
+        toast({
+          title: "Answer regenerated!",
+          description: "Here's a fresh perspective on your question.",
+        });
+      } catch (error) {
+        console.error("Regeneration error:", error);
+        toast({
+          title: "Error",
+          description: "Failed to regenerate answer. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
         setIsLoading(false);
-      }, 2000);
+      }
+    } else if (!hasApiKey) {
+      toast({
+        title: "API Key needed",
+        description: "Please set your API key first to regenerate answers.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -82,23 +140,31 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <Header />
       <SubjectTabs 
         selectedSubject={selectedSubject} 
         onSubjectSelect={setSelectedSubject} 
       />
+      
+      <ApiKeyInput 
+        onApiKeySet={handleApiKeySet}
+        hasApiKey={hasApiKey}
+      />
+      
       <SearchArea 
         selectedSubject={selectedSubject}
         onSearch={handleSearch}
         onImageUpload={handleImageUpload}
       />
+      
       <AnswerDisplay 
         answer={currentAnswer}
         isLoading={isLoading}
         onRegenerate={handleRegenerate}
         onFeedback={handleFeedback}
       />
+      
       <Footer />
     </div>
   );
