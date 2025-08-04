@@ -2,12 +2,13 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import AdminStats from "./AdminStats";
 import AdminUsers from "./AdminUsers";
 import AdminQuestions from "./AdminQuestions";
 import AdminSettings from "./AdminSettings";
 import PremiumAdmin from "./premium/PremiumAdmin";
-import { Shield, LogOut, BarChart } from "lucide-react";
+import { Shield, LogOut, BarChart, Crown, Bot } from "lucide-react";
 
 interface AdminDashboardProps {
   onLogout: () => void;
@@ -27,17 +28,25 @@ const AdminDashboard = ({ onLogout }: AdminDashboardProps) => {
               </div>
               <div>
                 <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-                <p className="text-muted-foreground">AskZen Management Panel</p>
+                <p className="text-muted-foreground">AskZen PDF Hub Management Panel</p>
               </div>
+              <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white">
+                Enhanced
+              </Badge>
             </div>
-            <Button 
-              onClick={onLogout}
-              variant="outline"
-              className="hover:bg-destructive hover:text-destructive-foreground"
-            >
-              <LogOut className="h-4 w-4 mr-2" />
-              Logout
-            </Button>
+            <div className="flex items-center space-x-3">
+              <Badge variant="outline" className="text-green-700 border-green-300">
+                🟢 System Online
+              </Badge>
+              <Button 
+                onClick={onLogout}
+                variant="outline"
+                className="hover:bg-destructive hover:text-destructive-foreground"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -45,12 +54,30 @@ const AdminDashboard = ({ onLogout }: AdminDashboardProps) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-6 mb-8">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="users">Users</TabsTrigger>
-            <TabsTrigger value="questions">Questions</TabsTrigger>
-            <TabsTrigger value="premium">Premium</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            <TabsTrigger value="settings">Settings</TabsTrigger>
+            <TabsTrigger value="overview" className="flex items-center space-x-2">
+              <BarChart className="h-4 w-4" />
+              <span>Overview</span>
+            </TabsTrigger>
+            <TabsTrigger value="users" className="flex items-center space-x-2">
+              <Shield className="h-4 w-4" />
+              <span>Users</span>
+            </TabsTrigger>
+            <TabsTrigger value="questions" className="flex items-center space-x-2">
+              <BarChart className="h-4 w-4" />
+              <span>Questions</span>
+            </TabsTrigger>
+            <TabsTrigger value="premium" className="flex items-center space-x-2">
+              <Crown className="h-4 w-4" />
+              <span>Premium & PDFs</span>
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="flex items-center space-x-2">
+              <BarChart className="h-4 w-4" />
+              <span>Analytics</span>
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="flex items-center space-x-2">
+              <Shield className="h-4 w-4" />
+              <span>Settings</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview">
@@ -73,11 +100,15 @@ const AdminDashboard = ({ onLogout }: AdminDashboardProps) => {
             <div className="text-center py-12">
               <BarChart className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-medium text-muted-foreground mb-2">
-                Analytics Dashboard
+                Advanced Analytics Dashboard
               </h3>
-              <p className="text-sm text-muted-foreground">
-                Advanced analytics coming soon with Supabase integration
+              <p className="text-sm text-muted-foreground mb-4">
+                Detailed analytics with PDF downloads, Telegram bot stats, and user engagement metrics
               </p>
+              <Badge variant="outline" className="text-blue-600 border-blue-300">
+                <Bot className="h-4 w-4 mr-2" />
+                Coming soon with Supabase integration
+              </Badge>
             </div>
           </TabsContent>
 
